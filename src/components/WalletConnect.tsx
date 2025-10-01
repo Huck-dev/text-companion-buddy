@@ -104,7 +104,7 @@ export const WalletConnect = ({ onWalletConnected, onStripePayment }: WalletConn
           Wallet
         </CardTitle>
         <CardDescription>
-          Connect Subwallet to purchase with MOD tokens
+          Connect wallet or use card payment
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -134,11 +134,21 @@ export const WalletConnect = ({ onWalletConnected, onStripePayment }: WalletConn
               variant="default"
             >
               <Wallet className="h-5 w-5 mr-2" />
-              Connect Subwallet
+              Connect Subwallet (MOD)
             </Button>
-            <div className="text-xs text-muted-foreground text-center">
-              Subwallet required for MOD Chain transactions
-            </div>
+            <Button
+              onClick={connectMetaMask}
+              disabled={isConnecting}
+              className="w-full justify-start"
+              variant="outline"
+            >
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" 
+                alt="MetaMask"
+                className="h-5 w-5 mr-2"
+              />
+              Connect MetaMask (USDC)
+            </Button>
           </div>
         )}
         

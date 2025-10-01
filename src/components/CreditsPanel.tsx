@@ -215,7 +215,7 @@ export const CreditsPanel = () => {
                   <span className="text-lg font-bold text-primary">{pkg.credits} Credits</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  ${pkg.price} • {pkg.modPrice} MOD
+                  ${pkg.price} • {pkg.usdcPrice} USDC • {pkg.modPrice} MOD
                 </div>
                 <Button
                   className="w-full h-8"
@@ -234,6 +234,17 @@ export const CreditsPanel = () => {
                     size="sm"
                   >
                     {pkg.modPrice} MOD
+                  </Button>
+                )}
+                {walletAddress && walletType === 'metamask' && (
+                  <Button
+                    className="w-full h-8"
+                    variant="outline"
+                    onClick={() => purchaseWithCrypto(pkg.credits, pkg.usdcPrice, 'USDC', pkg.label)}
+                    disabled={isLoading}
+                    size="sm"
+                  >
+                    {pkg.usdcPrice} USDC
                   </Button>
                 )}
               </div>
@@ -262,7 +273,7 @@ export const CreditsPanel = () => {
                   <span className="text-xl font-bold text-primary">{plan.credits} Credits/mo</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  ${plan.price}/mo • {plan.modPrice} MOD/mo
+                  ${plan.price}/mo • {plan.usdcPrice} USDC/mo • {plan.modPrice} MOD/mo
                 </div>
                 <Button
                   className="w-full h-9"
@@ -282,6 +293,17 @@ export const CreditsPanel = () => {
                     size="sm"
                   >
                     {plan.modPrice} MOD/mo
+                  </Button>
+                )}
+                {walletAddress && walletType === 'metamask' && (
+                  <Button
+                    className="w-full h-9"
+                    variant="outline"
+                    onClick={() => purchaseWithCrypto(plan.credits, plan.usdcPrice, 'USDC', plan.label)}
+                    disabled={isLoading}
+                    size="sm"
+                  >
+                    {plan.usdcPrice} USDC/mo
                   </Button>
                 )}
               </div>
