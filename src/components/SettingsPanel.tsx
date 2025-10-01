@@ -36,6 +36,7 @@ export const SettingsPanel = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="self-hosted">Self Hosted</SelectItem>
               <SelectItem value="google/gemini-2.5-flash">Gemini 2.5 Flash (Free)</SelectItem>
               <SelectItem value="google/gemini-2.5-pro">Gemini 2.5 Pro (Free)</SelectItem>
               <SelectItem value="google/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (Free)</SelectItem>

@@ -31,7 +31,7 @@ const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [model, setModel] = useState("google/gemini-2.5-flash");
+  const [model, setModel] = useState("self-hosted");
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(500);
   const [tools, setTools] = useState<Tool[]>([]);
@@ -57,11 +57,14 @@ const Index = () => {
     setIsLoading(true);
 
     try {
+      // Map "self-hosted" to actual Gemini model
+      const actualModel = model === "self-hosted" ? "google/gemini-2.5-flash" : model;
+      
       const { data, error } = await supabase.functions.invoke("text-completion", {
         body: {
           prompt: input,
           settings: {
-            model,
+            model: actualModel,
             temperature,
             max_tokens: maxTokens,
             tools: tools.length > 0 ? tools : undefined,
