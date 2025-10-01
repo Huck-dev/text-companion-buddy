@@ -161,7 +161,7 @@ export const CreditsPanel = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <WalletConnect 
         onWalletConnected={(address, type) => {
           setWalletAddress(address);
@@ -169,154 +169,138 @@ export const CreditsPanel = () => {
         }} 
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Coins className="h-5 w-5" />
-            Your MOD Tokens
-          </CardTitle>
-          <CardDescription>
-            Current balance and model costs
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-4xl font-bold mb-4">{credits} MOD</div>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p className="font-semibold">Model Costs per Use:</p>
-            <div className="grid grid-cols-2 gap-2">
-              <div>Self Hosted: 1 MOD</div>
-              <div>Gemini Flash: 1 MOD</div>
-              <div>Gemini Flash Lite: 1 MOD</div>
-              <div>Gemini Pro: 3 MOD</div>
-              <div>GPT-5 Nano: 2 MOD</div>
-              <div>GPT-5 Mini: 5 MOD</div>
-              <div>GPT-5: 10 MOD</div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="bg-card/30 border-border/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Coins className="h-5 w-5 text-primary" />
+              Your MOD Tokens
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{credits} MOD</div>
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p className="font-semibold text-sm mb-2">Model Costs per Use:</p>
+              <div className="grid grid-cols-2 gap-1">
+                <div>Self Hosted: 1 MOD</div>
+                <div>Gemini Flash: 1 MOD</div>
+                <div>Flash Lite: 1 MOD</div>
+                <div>Gemini Pro: 3 MOD</div>
+                <div>GPT-5 Nano: 2 MOD</div>
+                <div>GPT-5 Mini: 5 MOD</div>
+                <div>GPT-5: 10 MOD</div>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
-            Pay Per Use
-          </CardTitle>
-          <CardDescription>
-            Purchase MOD tokens as you need them
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            {CREDIT_PACKAGES.map((pkg) => (
-              <div key={pkg.label} className="border rounded-lg p-4 space-y-3">
-                <div className="font-semibold">{pkg.label}</div>
-                <div className="text-2xl font-bold">{pkg.credits} MOD</div>
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  <div>Fiat: ${pkg.price}</div>
-                  <div>USDC: {pkg.usdcPrice}</div>
-                  <div>MOD: {pkg.modPrice}</div>
+        <Card className="bg-card/30 border-border/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Zap className="h-5 w-5 text-accent" />
+              Quick Purchase
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2">
+              {CREDIT_PACKAGES.map((pkg) => (
+              <div key={pkg.label} className="bg-secondary/10 rounded-lg p-3 space-y-2 border border-border/30">
+                <div className="flex justify-between items-baseline">
+                  <span className="font-semibold text-sm">{pkg.label}</span>
+                  <span className="text-lg font-bold text-primary">{pkg.credits} MOD</span>
                 </div>
-                <div className="space-y-2">
+                <div className="text-xs text-muted-foreground">
+                  ${pkg.price} • {pkg.usdcPrice} USDC • {pkg.modPrice} MOD
+                </div>
+                <Button
+                  className="w-full h-8"
+                  onClick={() => purchaseCredits(pkg.credits, pkg.label)}
+                  disabled={isLoading}
+                  size="sm"
+                >
+                  Buy
+                </Button>
+                {walletAddress && walletType === 'metamask' && (
                   <Button
-                    className="w-full"
-                    onClick={() => purchaseCredits(pkg.credits, pkg.label)}
+                    className="w-full h-8"
+                    variant="outline"
+                    onClick={() => purchaseWithCrypto(pkg.credits, pkg.usdcPrice, 'USDC', pkg.label)}
                     disabled={isLoading}
                     size="sm"
                   >
-                    Buy with Card
+                    {pkg.usdcPrice} USDC
                   </Button>
-                  {walletAddress && (
-                    <>
-                      {walletType === 'metamask' && (
-                        <Button
-                          className="w-full"
-                          variant="outline"
-                          onClick={() => purchaseWithCrypto(pkg.credits, pkg.usdcPrice, 'USDC', pkg.label)}
-                          disabled={isLoading}
-                          size="sm"
-                        >
-                          Pay {pkg.usdcPrice} USDC
-                        </Button>
-                      )}
-                      {walletType === 'subwallet' && (
-                        <Button
-                          className="w-full"
-                          variant="outline"
-                          onClick={() => purchaseWithCrypto(pkg.credits, pkg.modPrice, 'MOD', pkg.label)}
-                          disabled={isLoading}
-                          size="sm"
-                        >
-                          Pay {pkg.modPrice} MOD
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </div>
+                )}
+                {walletAddress && walletType === 'subwallet' && (
+                  <Button
+                    className="w-full h-8"
+                    variant="outline"
+                    onClick={() => purchaseWithCrypto(pkg.credits, pkg.modPrice, 'MOD', pkg.label)}
+                    disabled={isLoading}
+                    size="sm"
+                  >
+                    {pkg.modPrice} MOD
+                  </Button>
+                )}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
+      <Card className="bg-card/30 border-border/50">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <CreditCard className="h-5 w-5 text-accent" />
             Monthly Subscriptions
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs">
             Get recurring MOD tokens every month
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2">
             {MONTHLY_PLANS.map((plan) => (
-              <div key={plan.label} className="border rounded-lg p-4 space-y-3">
-                <div className="font-semibold">{plan.label}</div>
-                <div className="text-2xl font-bold">{plan.credits} MOD/mo</div>
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  <div>Fiat: ${plan.price}/month</div>
-                  <div>USDC: {plan.usdcPrice}/month</div>
-                  <div>MOD: {plan.modPrice}/month</div>
+              <div key={plan.label} className="bg-secondary/10 rounded-lg p-4 space-y-2 border border-border/30">
+                <div className="flex justify-between items-baseline">
+                  <span className="font-semibold">{plan.label}</span>
+                  <span className="text-xl font-bold text-primary">{plan.credits} MOD/mo</span>
                 </div>
-                <div className="space-y-2">
+                <div className="text-xs text-muted-foreground">
+                  ${plan.price}/mo • {plan.usdcPrice} USDC/mo • {plan.modPrice} MOD/mo
+                </div>
+                <Button
+                  className="w-full h-9"
+                  variant="outline"
+                  onClick={() => purchaseCredits(plan.credits, plan.label)}
+                  disabled={isLoading}
+                  size="sm"
+                >
+                  Subscribe
+                </Button>
+                {walletAddress && walletType === 'metamask' && (
                   <Button
-                    className="w-full"
+                    className="w-full h-9"
                     variant="outline"
-                    onClick={() => purchaseCredits(plan.credits, plan.label)}
+                    onClick={() => purchaseWithCrypto(plan.credits, plan.usdcPrice, 'USDC', plan.label)}
                     disabled={isLoading}
                     size="sm"
                   >
-                    Subscribe with Card
+                    {plan.usdcPrice} USDC/mo
                   </Button>
-                  {walletAddress && (
-                    <>
-                      {walletType === 'metamask' && (
-                        <Button
-                          className="w-full"
-                          variant="outline"
-                          onClick={() => purchaseWithCrypto(plan.credits, plan.usdcPrice, 'USDC', plan.label)}
-                          disabled={isLoading}
-                          size="sm"
-                        >
-                          {plan.usdcPrice} USDC/mo
-                        </Button>
-                      )}
-                      {walletType === 'subwallet' && (
-                        <Button
-                          className="w-full"
-                          variant="outline"
-                          onClick={() => purchaseWithCrypto(plan.credits, plan.modPrice, 'MOD', plan.label)}
-                          disabled={isLoading}
-                          size="sm"
-                        >
-                          {plan.modPrice} MOD/mo
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </div>
+                )}
+                {walletAddress && walletType === 'subwallet' && (
+                  <Button
+                    className="w-full h-9"
+                    variant="outline"
+                    onClick={() => purchaseWithCrypto(plan.credits, plan.modPrice, 'MOD', plan.label)}
+                    disabled={isLoading}
+                    size="sm"
+                  >
+                    {plan.modPrice} MOD/mo
+                  </Button>
+                )}
               </div>
             ))}
           </div>

@@ -54,14 +54,15 @@ export const ImageGeneration = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
+    <div className="space-y-4">
+      <Card className="p-6 bg-card/30 border-border/50">
+        <div className="space-y-4">
         <div>
           <Textarea
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+          onChange={(e) => setPrompt(e.target.value)}
             placeholder="Describe the image you want to generate..."
-            className="min-h-[100px] bg-card border-border"
+            className="min-h-[100px] bg-secondary/20 border-border/50"
           />
         </div>
 
@@ -74,7 +75,7 @@ export const ImageGeneration = () => {
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
-              className="flex-1 bg-card border-border"
+              className="flex-1 bg-secondary/20 border-border/50"
             />
             {editImage && (
               <Button
@@ -114,10 +115,11 @@ export const ImageGeneration = () => {
             </>
           )}
         </Button>
-      </div>
+        </div>
+      </Card>
 
       {generatedImage && (
-        <Card className="p-4 bg-card border-border">
+        <Card className="p-4 bg-card/30 border-border/50">
           <img
             src={generatedImage}
             alt="Generated"

@@ -118,9 +118,9 @@ export const SpeechTools = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Speech to Text */}
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-card/30 border-border/50">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Mic className="w-5 h-5 text-primary" />
           Speech to Text
@@ -160,7 +160,7 @@ export const SpeechTools = () => {
       </Card>
 
       {/* Text to Speech */}
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-card/30 border-border/50">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <Volume2 className="w-5 h-5 text-primary" />
           Text to Speech

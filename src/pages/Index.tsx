@@ -161,9 +161,9 @@ const Index = () => {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="chat" className="flex flex-col h-[calc(100vh-340px)]">
+              <TabsContent value="chat" className="space-y-4">
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto mb-4 p-6 rounded-lg bg-card/50 backdrop-blur-sm border border-border">
+                <div className="min-h-[500px] max-h-[600px] overflow-y-auto p-6 rounded-lg bg-card/30 backdrop-blur-sm border border-border/50">
                   {messages.length === 0 ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center space-y-4">
@@ -226,16 +226,16 @@ const Index = () => {
                 </form>
               </TabsContent>
 
-              <TabsContent value="image">
+              <TabsContent value="image" className="space-y-4">
                 <ImageGeneration />
               </TabsContent>
 
-              <TabsContent value="speech">
+              <TabsContent value="speech" className="space-y-4">
                 <SpeechTools />
               </TabsContent>
 
-              <TabsContent value="video">
-                <div className="p-8 text-center bg-card/50 rounded-lg border border-border">
+              <TabsContent value="video" className="space-y-4">
+                <div className="p-8 text-center bg-card/30 rounded-lg border border-border/50">
                   <Wrench className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                   <h3 className="text-xl font-semibold mb-2">Video Generation</h3>
                   <p className="text-muted-foreground">
@@ -244,11 +244,11 @@ const Index = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="mcp">
+              <TabsContent value="mcp" className="space-y-4">
                 <MCPServerPanel servers={mcpServers} onServersChange={setMCPServers} />
               </TabsContent>
 
-              <TabsContent value="credits">
+              <TabsContent value="credits" className="space-y-4">
                 <CreditsPanel />
               </TabsContent>
             </Tabs>
