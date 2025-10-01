@@ -72,9 +72,46 @@ export const ToolsPanel = ({ tools, onToolsChange }: ToolsPanelProps) => {
 
       <div className="space-y-3">
         {tools.length === 0 && !showAddTool && (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No tools configured. Add tools to enable MCP functionality.
-          </p>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground text-center py-2">
+              Example tools below. Click Add Tool to create custom ones.
+            </p>
+            <div className="space-y-2 opacity-60">
+              <Card className="p-3 bg-secondary/50 border-border/50">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="secondary" className="text-xs">function</Badge>
+                      <span className="text-sm font-medium text-foreground">get_weather</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Get current weather for a location</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-3 bg-secondary/50 border-border/50">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="secondary" className="text-xs">function</Badge>
+                      <span className="text-sm font-medium text-foreground">search_web</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Search the web for information</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-3 bg-secondary/50 border-border/50">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="secondary" className="text-xs">function</Badge>
+                      <span className="text-sm font-medium text-foreground">calculate</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Perform mathematical calculations</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
         )}
 
         {tools.map((tool, index) => (
