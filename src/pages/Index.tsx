@@ -2,12 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Loader2, Sparkles, MessageSquare, Image, Volume2, Wrench } from "lucide-react";
+import { Send, Loader2, Sparkles, MessageSquare, Image, Volume2, Wrench, Server } from "lucide-react";
 import { ChatMessage } from "@/components/ChatMessage";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ToolsPanel } from "@/components/ToolsPanel";
 import { ImageGeneration } from "@/components/ImageGeneration";
 import { SpeechTools } from "@/components/SpeechTools";
+import { MCPServerPanel } from "@/components/MCPServerPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,6 +35,7 @@ const Index = () => {
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(500);
   const [tools, setTools] = useState<Tool[]>([]);
+  const [mcpServers, setMCPServers] = useState<Array<{ name: string; url: string; status: "connected" | "disconnected" }>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -128,7 +130,7 @@ const Index = () => {
           {/* Main Content Area */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="chat" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-6">
+              <TabsList className="grid w-full grid-cols-5 mb-6">
                 <TabsTrigger value="chat">
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Chat
@@ -144,6 +146,10 @@ const Index = () => {
                 <TabsTrigger value="video">
                   <Wrench className="w-4 h-4 mr-2" />
                   Video
+                </TabsTrigger>
+                <TabsTrigger value="mcp">
+                  <Server className="w-4 h-4 mr-2" />
+                  MCP
                 </TabsTrigger>
               </TabsList>
 
@@ -228,6 +234,10 @@ const Index = () => {
                     Video generation coming soon. This will integrate with video AI models for content creation.
                   </p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="mcp">
+                <MCPServerPanel servers={mcpServers} onServersChange={setMCPServers} />
               </TabsContent>
             </Tabs>
           </div>
