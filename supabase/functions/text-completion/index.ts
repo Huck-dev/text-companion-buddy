@@ -82,12 +82,12 @@ serve(async (req) => {
 
     if (currentCredits < creditCost) {
       return new Response(
-        JSON.stringify({ error: `Insufficient credits. Need ${creditCost} credits, have ${currentCredits}` }),
+        JSON.stringify({ error: `Insufficient MOD tokens. Need ${creditCost} MOD, have ${currentCredits} MOD` }),
         { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Calling Lovable AI with model:', model, 'Cost:', creditCost, 'credits');
+    console.log('Calling Lovable AI with model:', model, 'Cost:', creditCost, 'MOD tokens');
 
     const requestBody: any = {
       model,
