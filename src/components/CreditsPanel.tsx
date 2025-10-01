@@ -160,7 +160,7 @@ export const CreditsPanel = () => {
     }
   };
 
-  const purchaseWithStripe = async (amount: number, packageLabel: string) => {
+  const handleStripePayment = () => {
     toast.info("Stripe payment integration coming soon!");
   };
 
@@ -170,7 +170,8 @@ export const CreditsPanel = () => {
         onWalletConnected={(address, type) => {
           setWalletAddress(address);
           setWalletType(type);
-        }} 
+        }}
+        onStripePayment={handleStripePayment}
       />
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -216,25 +217,14 @@ export const CreditsPanel = () => {
                 <div className="text-xs text-muted-foreground">
                   ${pkg.price} • {pkg.usdcPrice} USDC • {pkg.modPrice} MOD
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1 h-8"
-                    onClick={() => purchaseCredits(pkg.credits, pkg.label)}
-                    disabled={isLoading}
-                    size="sm"
-                  >
-                    Buy ${pkg.price}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-8 px-2"
-                    onClick={() => purchaseWithStripe(pkg.credits, pkg.label)}
-                    disabled={isLoading}
-                    size="sm"
-                  >
-                    <CreditCard className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  className="w-full h-8"
+                  onClick={() => purchaseCredits(pkg.credits, pkg.label)}
+                  disabled={isLoading}
+                  size="sm"
+                >
+                  Buy ${pkg.price}
+                </Button>
                 {walletAddress && walletType === 'metamask' && (
                   <Button
                     className="w-full h-8"
@@ -285,26 +275,15 @@ export const CreditsPanel = () => {
                 <div className="text-xs text-muted-foreground">
                   ${plan.price}/mo • {plan.usdcPrice} USDC/mo • {plan.modPrice} MOD/mo
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1 h-9"
-                    variant="outline"
-                    onClick={() => purchaseCredits(plan.credits, plan.label)}
-                    disabled={isLoading}
-                    size="sm"
-                  >
-                    Subscribe ${plan.price}/mo
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-9 px-2"
-                    onClick={() => purchaseWithStripe(plan.credits, plan.label)}
-                    disabled={isLoading}
-                    size="sm"
-                  >
-                    <CreditCard className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  className="w-full h-9"
+                  variant="outline"
+                  onClick={() => purchaseCredits(plan.credits, plan.label)}
+                  disabled={isLoading}
+                  size="sm"
+                >
+                  Subscribe ${plan.price}/mo
+                </Button>
                 {walletAddress && walletType === 'metamask' && (
                   <Button
                     className="w-full h-9"

@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, CheckCircle2 } from "lucide-react";
+import { Wallet, CheckCircle2, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { ethers } from "ethers";
 
 interface WalletConnectProps {
   onWalletConnected?: (address: string, walletType: 'metamask' | 'subwallet') => void;
+  onStripePayment?: () => void;
 }
 
-export const WalletConnect = ({ onWalletConnected }: WalletConnectProps) => {
+export const WalletConnect = ({ onWalletConnected, onStripePayment }: WalletConnectProps) => {
   const [connectedAddress, setConnectedAddress] = useState<string>("");
   const [walletType, setWalletType] = useState<'metamask' | 'subwallet' | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -100,10 +101,10 @@ export const WalletConnect = ({ onWalletConnected }: WalletConnectProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Wallet className="h-5 w-5" />
-          Crypto Wallet
+          Wallet
         </CardTitle>
         <CardDescription>
-          Connect your wallet for USDC and MOD token payments
+          Connect your wallet or use credit card
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -150,6 +151,17 @@ export const WalletConnect = ({ onWalletConnected }: WalletConnectProps) => {
             </Button>
           </div>
         )}
+        
+        <div className="pt-4 border-t">
+          <Button
+            onClick={onStripePayment}
+            variant="outline"
+            className="w-full justify-start"
+          >
+            <CreditCard className="h-5 w-5 mr-2" />
+            Pay with Card (Stripe)
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
