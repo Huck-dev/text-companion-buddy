@@ -2,13 +2,14 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Loader2, Sparkles, MessageSquare, Image, Volume2, Wrench, Server } from "lucide-react";
+import { Send, Loader2, Sparkles, MessageSquare, Image, Volume2, Wrench, Server, Coins } from "lucide-react";
 import { ChatMessage } from "@/components/ChatMessage";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ToolsPanel } from "@/components/ToolsPanel";
 import { ImageGeneration } from "@/components/ImageGeneration";
 import { SpeechTools } from "@/components/SpeechTools";
 import { MCPServerPanel } from "@/components/MCPServerPanel";
+import { CreditsPanel } from "@/components/CreditsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -133,7 +134,7 @@ const Index = () => {
           {/* Main Content Area */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="chat" className="w-full">
-              <TabsList className="grid w-full grid-cols-5 mb-6">
+              <TabsList className="grid w-full grid-cols-6 mb-6">
                 <TabsTrigger value="chat">
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Chat
@@ -153,6 +154,10 @@ const Index = () => {
                 <TabsTrigger value="mcp">
                   <Server className="w-4 h-4 mr-2" />
                   MCP
+                </TabsTrigger>
+                <TabsTrigger value="credits">
+                  <Coins className="w-4 h-4 mr-2" />
+                  Credits
                 </TabsTrigger>
               </TabsList>
 
@@ -241,6 +246,10 @@ const Index = () => {
 
               <TabsContent value="mcp">
                 <MCPServerPanel servers={mcpServers} onServersChange={setMCPServers} />
+              </TabsContent>
+
+              <TabsContent value="credits">
+                <CreditsPanel />
               </TabsContent>
             </Tabs>
           </div>

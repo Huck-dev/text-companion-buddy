@@ -1,8 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const MODEL_COSTS: Record<string, number> = {
+  "google/gemini-2.5-flash": 1,
+  "google/gemini-2.5-flash-lite": 1,
+  "google/gemini-2.5-pro": 3,
+  "openai/gpt-5-nano": 2,
+  "openai/gpt-5-mini": 5,
+  "openai/gpt-5": 10,
 };
 
 serve(async (req) => {
@@ -12,6 +22,29 @@ serve(async (req) => {
 
   try {
     const { prompt, settings = {} } = await req.json();
+    
+    // Get user from auth header
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     console.log('Text completion request received:', { prompt, settings });
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -27,7 +60,34 @@ serve(async (req) => {
       tools = []
     } = settings;
 
-    console.log('Calling Lovable AI with model:', model);
+    // Check credit cost
+    const creditCost = MODEL_COSTS[model] || 1;
+    
+    // Get user credits
+    const { data: creditData, error: creditError } = await supabase
+      .from('user_credits')
+      .select('credits')
+      .eq('user_id', user.id)
+      .single();
+
+    if (creditError && creditError.code !== 'PGRST116') {
+      console.error('Error fetching credits:', creditError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to check credits' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const currentCredits = creditData?.credits || 0;
+
+    if (currentCredits < creditCost) {
+      return new Response(
+        JSON.stringify({ error: `Insufficient credits. Need ${creditCost} credits, have ${currentCredits}` }),
+        { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Calling Lovable AI with model:', model, 'Cost:', creditCost, 'credits');
 
     const requestBody: any = {
       model,
@@ -84,6 +144,28 @@ serve(async (req) => {
 
     const data = await response.json();
     console.log('Response received, has tool calls:', !!data.choices?.[0]?.message?.tool_calls);
+
+    // Deduct credits
+    const newCredits = currentCredits - creditCost;
+    const { error: updateError } = await supabase
+      .from('user_credits')
+      .update({ credits: newCredits })
+      .eq('user_id', user.id);
+
+    if (updateError) {
+      console.error('Error updating credits:', updateError);
+    } else {
+      // Log transaction
+      await supabase
+        .from('credit_transactions')
+        .insert({
+          user_id: user.id,
+          amount: -creditCost,
+          transaction_type: 'usage',
+          model_used: model,
+          description: `Used ${model} model`,
+        });
+    }
 
     return new Response(
       JSON.stringify(data),
