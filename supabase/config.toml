@@ -1,0 +1,4 @@
+project_id = "bkxkvkdqxudabqcsbvbb"
+
+[functions.text-completion]
+verify_jwt = false
