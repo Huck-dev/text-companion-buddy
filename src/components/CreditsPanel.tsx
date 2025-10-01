@@ -104,10 +104,10 @@ export const CreditsPanel = () => {
         });
 
       setCredits(newCredits);
-      toast.success(`Successfully added ${amount} MOD tokens!`);
+      toast.success(`Successfully added ${amount} credits!`);
     } catch (error) {
       console.error("Error purchasing credits:", error);
-      toast.error("Failed to purchase MOD tokens");
+      toast.error("Failed to purchase credits");
     } finally {
       setIsLoading(false);
     }
@@ -151,7 +151,7 @@ export const CreditsPanel = () => {
         });
 
       setCredits(newCredits);
-      toast.success(`Successfully purchased ${amount} MOD tokens with ${currency}!`);
+      toast.success(`Successfully purchased ${amount} credits with ${currency}!`);
     } catch (error) {
       console.error("Error purchasing with crypto:", error);
       toast.error("Failed to complete crypto payment");
@@ -179,21 +179,21 @@ export const CreditsPanel = () => {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Coins className="h-5 w-5 text-primary" />
-              Your MOD Tokens
+              Your Credits
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{credits} MOD</div>
+            <div className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{credits}</div>
             <div className="space-y-1 text-xs text-muted-foreground">
               <p className="font-semibold text-sm mb-2">Model Costs per Use:</p>
               <div className="grid grid-cols-2 gap-1">
-                <div>Self Hosted: 1 MOD</div>
-                <div>Gemini Flash: 1 MOD</div>
-                <div>Flash Lite: 1 MOD</div>
-                <div>Gemini Pro: 3 MOD</div>
-                <div>GPT-5 Nano: 2 MOD</div>
-                <div>GPT-5 Mini: 5 MOD</div>
-                <div>GPT-5: 10 MOD</div>
+                <div>Self Hosted: 1</div>
+                <div>Gemini Flash: 1</div>
+                <div>Flash Lite: 1</div>
+                <div>Gemini Pro: 3</div>
+                <div>GPT-5 Nano: 2</div>
+                <div>GPT-5 Mini: 5</div>
+                <div>GPT-5: 10</div>
               </div>
             </div>
           </CardContent>
@@ -212,10 +212,10 @@ export const CreditsPanel = () => {
               <div key={pkg.label} className="bg-secondary/10 rounded-lg p-3 space-y-2 border border-border/30">
                 <div className="flex justify-between items-baseline">
                   <span className="font-semibold text-sm">{pkg.label}</span>
-                  <span className="text-lg font-bold text-primary">{pkg.credits} MOD</span>
+                  <span className="text-lg font-bold text-primary">{pkg.credits} Credits</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  ${pkg.price} • {pkg.usdcPrice} USDC • {pkg.modPrice} MOD
+                  ${pkg.price} • {pkg.modPrice} MOD
                 </div>
                 <Button
                   className="w-full h-8"
@@ -225,17 +225,6 @@ export const CreditsPanel = () => {
                 >
                   Buy ${pkg.price}
                 </Button>
-                {walletAddress && walletType === 'metamask' && (
-                  <Button
-                    className="w-full h-8"
-                    variant="outline"
-                    onClick={() => purchaseWithCrypto(pkg.credits, pkg.usdcPrice, 'USDC', pkg.label)}
-                    disabled={isLoading}
-                    size="sm"
-                  >
-                    {pkg.usdcPrice} USDC
-                  </Button>
-                )}
                 {walletAddress && walletType === 'subwallet' && (
                   <Button
                     className="w-full h-8"
@@ -261,7 +250,7 @@ export const CreditsPanel = () => {
             Monthly Subscriptions
           </CardTitle>
           <CardDescription className="text-xs">
-            Get recurring MOD tokens every month
+            Get recurring credits every month
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -270,10 +259,10 @@ export const CreditsPanel = () => {
               <div key={plan.label} className="bg-secondary/10 rounded-lg p-4 space-y-2 border border-border/30">
                 <div className="flex justify-between items-baseline">
                   <span className="font-semibold">{plan.label}</span>
-                  <span className="text-xl font-bold text-primary">{plan.credits} MOD/mo</span>
+                  <span className="text-xl font-bold text-primary">{plan.credits} Credits/mo</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  ${plan.price}/mo • {plan.usdcPrice} USDC/mo • {plan.modPrice} MOD/mo
+                  ${plan.price}/mo • {plan.modPrice} MOD/mo
                 </div>
                 <Button
                   className="w-full h-9"
@@ -284,17 +273,6 @@ export const CreditsPanel = () => {
                 >
                   Subscribe ${plan.price}/mo
                 </Button>
-                {walletAddress && walletType === 'metamask' && (
-                  <Button
-                    className="w-full h-9"
-                    variant="outline"
-                    onClick={() => purchaseWithCrypto(plan.credits, plan.usdcPrice, 'USDC', plan.label)}
-                    disabled={isLoading}
-                    size="sm"
-                  >
-                    {plan.usdcPrice} USDC/mo
-                  </Button>
-                )}
                 {walletAddress && walletType === 'subwallet' && (
                   <Button
                     className="w-full h-9"
