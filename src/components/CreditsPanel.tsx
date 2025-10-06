@@ -37,14 +37,32 @@ export const CreditsPanel = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
       .select("wallet_address")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (data) {
+    if (error) {
+      console.error("Error loading wallet:", error);
+      return;
+    }
+
+    if (data?.wallet_address) {
       setWalletAddress(data.wallet_address);
+    } else {
+      // Create profile if it doesn't exist
+      const newAddress = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(20)))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert({ id: user.id, wallet_address: newAddress });
+      
+      if (!insertError) {
+        setWalletAddress(newAddress);
+        toast.success("Wallet address generated!");
+      }
     }
   };
 
