@@ -8,7 +8,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { ChatInterface } from "@/components/ChatInterface";
 import { SpinningCube } from "@/components/SpinningCube";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.png";
+import { LogoCube } from "@/components/LogoCube";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("compute");
@@ -59,9 +59,7 @@ const Index = () => {
         <header className="h-16 flex items-center justify-between border-b border-border/50 bg-card/50 backdrop-blur-xl px-6 shadow-lg relative ml-20">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
           <div className="flex items-center gap-4 relative z-10 flex-1">
-            <div className="bg-white rounded-lg p-2 shadow-md">
-              <img src={logo} alt="Logo" className="w-10 h-10 object-contain" />
-            </div>
+            <LogoCube />
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
               <TabsList className="grid w-full max-w-2xl grid-cols-3 bg-secondary/50 backdrop-blur-sm">
                 <TabsTrigger value="compute" className="data-[state=active]:bg-primary/20">
