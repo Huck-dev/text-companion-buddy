@@ -6,7 +6,6 @@ import { CreditsPanel } from "@/components/CreditsPanel";
 import { ComputePanel } from "@/components/ComputePanel";
 import { UserMenu } from "@/components/UserMenu";
 import { ChatInterface } from "@/components/ChatInterface";
-import { SpinningCube } from "@/components/SpinningCube";
 import { Button } from "@/components/ui/button";
 import { LogoCube } from "@/components/LogoCube";
 
@@ -28,9 +27,6 @@ const Index = () => {
         <div className="h-full border-r border-border/50 backdrop-blur-xl bg-card/95 shadow-2xl">
           <div className="p-6 h-full flex flex-col">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-16 h-16">
-                <SpinningCube onClick={() => setIsChatOpen(false)} />
-              </div>
               <Button
                 variant="ghost"
                 size="icon"
@@ -49,8 +45,8 @@ const Index = () => {
 
       {/* Floating Cube Button - Shows when chat is closed */}
       {!isChatOpen && (
-        <div className="fixed top-6 left-6 z-50 animate-fade-in">
-          <SpinningCube onClick={() => setIsChatOpen(true)} />
+        <div className="fixed top-6 left-6 z-50 animate-fade-in" onClick={() => setIsChatOpen(true)}>
+          <LogoCube />
         </div>
       )}
 
