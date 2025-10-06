@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Server, Cpu, DollarSign, Plus, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +16,7 @@ interface ComputeHost {
   endpoint: string;
   status: string;
   location: string | null;
+  server_type: string;
   total_executions: number;
   successful_executions: number;
   total_earnings: number;
@@ -23,7 +25,8 @@ interface ComputeHost {
 
 interface ComputeExecution {
   id: string;
-  mcp_server_name: string;
+  server_name: string;
+  server_type: string;
   function_name: string;
   status: string;
   cost_credits: number;
@@ -40,6 +43,7 @@ export const ComputePanel = () => {
     name: "",
     endpoint: "",
     location: "",
+    server_type: "misc" as "mcp" | "a2a" | "misc",
     profit_share: 70,
   });
   const { toast } = useToast();
@@ -92,6 +96,7 @@ export const ComputePanel = () => {
       name: newHost.name,
       endpoint: newHost.endpoint,
       location: newHost.location || null,
+      server_type: newHost.server_type,
       profit_share_percentage: newHost.profit_share,
       status: "online",
     });
@@ -110,7 +115,7 @@ export const ComputePanel = () => {
       description: "Compute host added successfully!",
     });
     setShowAddHost(false);
-    setNewHost({ name: "", endpoint: "", location: "", profit_share: 70 });
+    setNewHost({ name: "", endpoint: "", location: "", server_type: "misc", profit_share: 70 });
     loadHosts();
   };
 
@@ -186,6 +191,22 @@ export const ComputePanel = () => {
               />
             </div>
             <div>
+              <Label>Server Type</Label>
+              <Select
+                value={newHost.server_type}
+                onValueChange={(value: "mcp" | "a2a" | "misc") => setNewHost({ ...newHost, server_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mcp">MCP (Model Context Protocol)</SelectItem>
+                  <SelectItem value="a2a">A2A (Agent-to-Agent)</SelectItem>
+                  <SelectItem value="misc">Misc (Custom)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label>Profit Share % (Host takes this percentage)</Label>
               <Input
                 type="number"
@@ -236,6 +257,7 @@ export const ComputePanel = () => {
                       {host.location && (
                         <Badge variant="outline">{host.location}</Badge>
                       )}
+                      <Badge variant="secondary">{host.server_type.toUpperCase()}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{host.endpoint}</p>
                     <div className="flex gap-4 text-sm">
@@ -276,8 +298,9 @@ export const ComputePanel = () => {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge className={getExecutionStatusColor(exec.status)}>{exec.status}</Badge>
+                      <Badge variant="outline">{exec.server_type.toUpperCase()}</Badge>
                       <span className="font-medium">
-                        {exec.mcp_server_name}.{exec.function_name}()
+                        {exec.server_name}.{exec.function_name}()
                       </span>
                     </div>
                     <div className="text-sm text-muted-foreground">

@@ -31,17 +31,19 @@ serve(async (req) => {
     }
 
     const {
-      mcp_server_name,
-      function_name,
-      parameters = {},
-      required_capabilities = [],
-      preferred_location = null,
-      cost_credits = 10,
+        server_name,
+        function_name,
+        parameters = {},
+        required_capabilities = [],
+        preferred_location = null,
+        server_type = null,
+        cost_credits = 10,
     } = await req.json();
 
-    console.log("Executing MCP function:", {
-      mcp_server_name,
+    console.log("Executing function:", {
+      server_name,
       function_name,
+      server_type,
       required_capabilities,
     });
 
@@ -49,6 +51,7 @@ serve(async (req) => {
     const { data: hostId, error: hostError } = await supabaseClient.rpc("select_best_host", {
       required_capabilities,
       preferred_location,
+      required_server_type: server_type,
     });
 
     if (hostError || !hostId) {
@@ -78,7 +81,8 @@ serve(async (req) => {
       .insert({
         requester_id: user.id,
         host_id: hostId,
-        mcp_server_name,
+        server_name,
+        server_type: server_type || 'misc',
         function_name,
         parameters,
         cost_credits,
@@ -113,7 +117,8 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          mcp_server: mcp_server_name,
+          server: server_name,
+          server_type: server_type || 'misc',
           function: function_name,
           parameters,
         }),

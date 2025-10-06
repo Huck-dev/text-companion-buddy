@@ -25,11 +25,12 @@ export type Database = {
           host_earnings: number | null
           host_id: string | null
           id: string
-          mcp_server_name: string
           parameters: Json | null
           platform_earnings: number | null
           requester_id: string
           result: Json | null
+          server_name: string
+          server_type: Database["public"]["Enums"]["server_type"] | null
           started_at: string | null
           status: Database["public"]["Enums"]["execution_status"]
         }
@@ -43,11 +44,12 @@ export type Database = {
           host_earnings?: number | null
           host_id?: string | null
           id?: string
-          mcp_server_name: string
           parameters?: Json | null
           platform_earnings?: number | null
           requester_id: string
           result?: Json | null
+          server_name: string
+          server_type?: Database["public"]["Enums"]["server_type"] | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["execution_status"]
         }
@@ -61,11 +63,12 @@ export type Database = {
           host_earnings?: number | null
           host_id?: string | null
           id?: string
-          mcp_server_name?: string
           parameters?: Json | null
           platform_earnings?: number | null
           requester_id?: string
           result?: Json | null
+          server_name?: string
+          server_type?: Database["public"]["Enums"]["server_type"] | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["execution_status"]
         }
@@ -89,6 +92,8 @@ export type Database = {
           location: string | null
           name: string
           profit_share_percentage: number | null
+          server_info: Json | null
+          server_type: Database["public"]["Enums"]["server_type"] | null
           status: Database["public"]["Enums"]["compute_host_status"]
           successful_executions: number | null
           total_earnings: number | null
@@ -105,6 +110,8 @@ export type Database = {
           location?: string | null
           name: string
           profit_share_percentage?: number | null
+          server_info?: Json | null
+          server_type?: Database["public"]["Enums"]["server_type"] | null
           status?: Database["public"]["Enums"]["compute_host_status"]
           successful_executions?: number | null
           total_earnings?: number | null
@@ -121,6 +128,8 @@ export type Database = {
           location?: string | null
           name?: string
           profit_share_percentage?: number | null
+          server_info?: Json | null
+          server_type?: Database["public"]["Enums"]["server_type"] | null
           status?: Database["public"]["Enums"]["compute_host_status"]
           successful_executions?: number | null
           total_earnings?: number | null
@@ -235,7 +244,11 @@ export type Database = {
     }
     Functions: {
       select_best_host: {
-        Args: { preferred_location?: string; required_capabilities: string[] }
+        Args: {
+          preferred_location?: string
+          required_capabilities: string[]
+          required_server_type?: Database["public"]["Enums"]["server_type"]
+        }
         Returns: string
       }
     }
@@ -247,6 +260,7 @@ export type Database = {
         | "completed"
         | "failed"
         | "cancelled"
+      server_type: "mcp" | "a2a" | "misc"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -382,6 +396,7 @@ export const Constants = {
         "failed",
         "cancelled",
       ],
+      server_type: ["mcp", "a2a", "misc"],
     },
   },
 } as const
