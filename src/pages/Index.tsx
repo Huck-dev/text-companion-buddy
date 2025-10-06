@@ -30,10 +30,7 @@ const Index = () => {
       >
         <div className="h-full border-r border-border/50 backdrop-blur-xl bg-card/95 shadow-2xl">
           <div className="p-6 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                AI Assistant
-              </h2>
+            <div className="flex items-center justify-end mb-4">
               <Button
                 variant="ghost"
                 size="sm"
