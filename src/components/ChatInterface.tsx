@@ -33,8 +33,10 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="pb-3 border-b">
-        <h2 className="text-lg font-semibold">AI Assistant</h2>
+      <div className="pb-4 border-b border-border/50">
+        <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          AI Assistant
+        </h2>
       </div>
       
       <ScrollArea className="flex-1 py-4">
@@ -42,30 +44,39 @@ export const ChatInterface = () => {
           {messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-slide-up`}
             >
               <div
-                className={`max-w-[85%] rounded-lg p-3 animate-fade-in ${
+                className={`max-w-[85%] rounded-xl p-3.5 shadow-lg transition-all duration-300 hover:shadow-xl ${
                   msg.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                    ? "text-primary-foreground relative overflow-hidden"
+                    : "bg-card/80 backdrop-blur-sm border border-border/50"
                 }`}
+                style={msg.role === "user" ? { background: "var(--gradient-primary)" } : {}}
               >
-                {msg.content}
+                {msg.role === "user" && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                )}
+                <span className="relative">{msg.content}</span>
               </div>
             </div>
           ))}
         </div>
       </ScrollArea>
 
-      <form onSubmit={handleSend} className="pt-4 border-t flex gap-2">
+      <form onSubmit={handleSend} className="pt-4 border-t border-border/50 flex gap-2">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1"
+          className="flex-1 bg-secondary/50 border-border/50 focus:border-primary/50 transition-all duration-300"
         />
-        <Button type="submit" size="sm">
+        <Button 
+          type="submit" 
+          size="sm"
+          className="transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+          style={{ background: "var(--gradient-primary)" }}
+        >
           <Send className="w-4 h-4" />
         </Button>
       </form>

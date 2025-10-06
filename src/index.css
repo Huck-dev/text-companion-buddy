@@ -39,17 +39,32 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
+    /* Status Colors */
+    --status-success: 142 76% 36%;
+    --status-success-foreground: 145 15% 95%;
+    --status-warning: 45 93% 47%;
+    --status-warning-foreground: 145 30% 10%;
+    --status-error: 0 84% 60%;
+    --status-error-foreground: 145 15% 95%;
+    --status-info: 199 89% 48%;
+    --status-info-foreground: 145 15% 95%;
+    --status-neutral: 145 10% 45%;
+    --status-neutral-foreground: 145 15% 95%;
+
     /* Solarpunk Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(155 65% 55%), hsl(175 60% 50%));
     --gradient-card: linear-gradient(180deg, hsl(145 25% 14%), hsl(145 25% 12%));
     --gradient-subtle: linear-gradient(180deg, hsl(145 30% 10%), hsl(145 30% 8%));
     --gradient-nature: linear-gradient(135deg, hsl(155 65% 55%), hsl(45 85% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(145 30% 8%), hsl(155 40% 12%), hsl(145 30% 8%));
     
     /* Shadows and Effects */
     --shadow-glow: 0 0 40px hsl(155 65% 55% / 0.3);
     --shadow-card: 0 8px 32px hsl(145 30% 5% / 0.6);
     --shadow-nature: 0 4px 20px hsl(155 65% 55% / 0.2);
+    --shadow-elevated: 0 20px 60px hsl(145 30% 5% / 0.8), 0 0 0 1px hsl(155 65% 55% / 0.1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 }
 
@@ -60,5 +75,60 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .card-hover {
+    transition: var(--transition-smooth);
+  }
+
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

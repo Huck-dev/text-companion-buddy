@@ -122,41 +122,47 @@ export const ComputePanel = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "online":
-        return "bg-green-500";
+        return "bg-status-success text-status-success-foreground";
       case "busy":
-        return "bg-yellow-500";
+        return "bg-status-warning text-status-warning-foreground";
       case "offline":
-        return "bg-gray-500";
+        return "bg-status-neutral text-status-neutral-foreground";
       default:
-        return "bg-red-500";
+        return "bg-status-error text-status-error-foreground";
     }
   };
 
   const getExecutionStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-500";
+        return "bg-status-success text-status-success-foreground";
       case "running":
-        return "bg-blue-500";
+        return "bg-status-info text-status-info-foreground";
       case "failed":
-        return "bg-red-500";
+        return "bg-status-error text-status-error-foreground";
       default:
-        return "bg-yellow-500";
+        return "bg-status-warning text-status-warning-foreground";
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button onClick={() => setShowAddHost(true)} className="gap-2">
+      <div className="flex items-center justify-between animate-slide-up">
+        <Button 
+          onClick={() => setShowAddHost(true)} 
+          className="gap-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+          style={{ background: "var(--gradient-primary)" }}
+        >
           <Plus className="w-4 h-4" />
           Add Host
         </Button>
       </div>
 
       {showAddHost && (
-        <Card className="p-6 border-primary/30">
-          <h3 className="text-lg font-semibold mb-4">Add Compute Host</h3>
+        <Card className="p-6 border-primary/30 shadow-2xl animate-scale-in backdrop-blur-sm bg-card/95">
+          <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Add Compute Host
+          </h3>
           <div className="space-y-4">
             <div>
               <Label>Host Name</Label>
@@ -234,18 +240,22 @@ export const ComputePanel = () => {
 
         <TabsContent value="hosts" className="space-y-4">
           {hosts.length === 0 ? (
-            <Card className="p-8 text-center">
-              <Server className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">No compute hosts added yet</p>
+            <Card className="p-12 text-center backdrop-blur-sm bg-card/50 border-dashed border-2 border-border/50 animate-fade-in">
+              <div className="relative">
+                <div className="absolute inset-0 blur-xl opacity-30" style={{ background: "var(--gradient-primary)" }} />
+                <Server className="w-16 h-16 mx-auto mb-4 text-primary/40 relative animate-pulse" />
+              </div>
+              <p className="text-muted-foreground text-lg font-medium">No compute hosts added yet</p>
+              <p className="text-muted-foreground/60 text-sm mt-2">Add your first host to get started</p>
             </Card>
           ) : (
             hosts.map((host) => (
-              <Card key={host.id} className="p-6">
+              <Card key={host.id} className="p-6 card-hover backdrop-blur-sm bg-card/80 border-border/50 animate-slide-up">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold">{host.name}</h3>
-                      <Badge className={getStatusColor(host.status)}>{host.status}</Badge>
+                      <h3 className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">{host.name}</h3>
+                      <Badge className={`${getStatusColor(host.status)} shadow-sm`}>{host.status}</Badge>
                       {host.location && (
                         <Badge variant="outline">{host.location}</Badge>
                       )}
@@ -279,17 +289,21 @@ export const ComputePanel = () => {
 
         <TabsContent value="executions" className="space-y-4">
           {executions.length === 0 ? (
-            <Card className="p-8 text-center">
-              <Cpu className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground">No executions yet</p>
+            <Card className="p-12 text-center backdrop-blur-sm bg-card/50 border-dashed border-2 border-border/50 animate-fade-in">
+              <div className="relative">
+                <div className="absolute inset-0 blur-xl opacity-30" style={{ background: "var(--gradient-nature)" }} />
+                <Cpu className="w-16 h-16 mx-auto mb-4 text-accent/40 relative animate-pulse" />
+              </div>
+              <p className="text-muted-foreground text-lg font-medium">No executions yet</p>
+              <p className="text-muted-foreground/60 text-sm mt-2">Your compute tasks will appear here</p>
             </Card>
           ) : (
             executions.map((exec) => (
-              <Card key={exec.id} className="p-4">
+              <Card key={exec.id} className="p-4 card-hover backdrop-blur-sm bg-card/80 border-border/50 animate-slide-up">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge className={getExecutionStatusColor(exec.status)}>{exec.status}</Badge>
+                      <Badge className={`${getExecutionStatusColor(exec.status)} shadow-sm`}>{exec.status}</Badge>
                       <Badge variant="outline">{exec.server_type.toUpperCase()}</Badge>
                       <span className="font-medium">
                         {exec.server_name}.{exec.function_name}()
