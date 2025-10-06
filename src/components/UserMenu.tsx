@@ -124,6 +124,7 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange }: { onNetworkChan
     if (data?.solana_address) {
       // @ts-ignore
       setSolanaAddress(data.solana_address);
+      onAddressesChange?.(evmAddress || "", data.solana_address);
     } else {
       // Create Solana address if it doesn't exist (simplified base58-like format)
       const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -139,6 +140,7 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange }: { onNetworkChan
       
       if (!insertError) {
         setSolanaAddress(newSolanaAddress);
+        onAddressesChange?.(evmAddress || "", newSolanaAddress);
         toast({
           title: "Success",
           description: "Solana address generated!",
