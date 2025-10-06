@@ -5,8 +5,9 @@ import { MCPServerPanel } from "@/components/MCPServerPanel";
 import { CreditsPanel } from "@/components/CreditsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { SpinningCube } from "@/components/SpinningCube";
 
 interface Message {
   role: "user" | "assistant";
@@ -81,26 +82,92 @@ const Index = () => {
 
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="min-h-screen w-full flex bg-gradient-to-br from-background via-background to-background/95">
-        <AppSidebar
-          model={model}
-          temperature={temperature}
-          maxTokens={maxTokens}
-          onModelChange={setModel}
-          onTemperatureChange={setTemperature}
-          onMaxTokensChange={setMaxTokens}
-          messages={messages}
-          input={input}
-          isLoading={isLoading}
-          messagesEndRef={messagesEndRef}
-          onInputChange={setInput}
-          onSubmit={handleSubmit}
-        />
-        
-        <div className="flex-1 flex flex-col">
-          <header className="h-12 flex items-center border-b border-border/50 bg-card/30 backdrop-blur-sm px-4">
-            <SidebarTrigger />
-          </header>
+      <MainLayout
+        model={model}
+        temperature={temperature}
+        maxTokens={maxTokens}
+        onModelChange={setModel}
+        onTemperatureChange={setTemperature}
+        onMaxTokensChange={setMaxTokens}
+        messages={messages}
+        input={input}
+        isLoading={isLoading}
+        messagesEndRef={messagesEndRef}
+        onInputChange={setInput}
+        onSubmit={handleSubmit}
+        mcpServers={mcpServers}
+        onServersChange={setMCPServers}
+      />
+    </SidebarProvider>
+  );
+};
+
+function MainLayout({
+  model,
+  temperature,
+  maxTokens,
+  onModelChange,
+  onTemperatureChange,
+  onMaxTokensChange,
+  messages,
+  input,
+  isLoading,
+  messagesEndRef,
+  onInputChange,
+  onSubmit,
+  mcpServers,
+  onServersChange,
+}: {
+  model: string;
+  temperature: number;
+  maxTokens: number;
+  onModelChange: (model: string) => void;
+  onTemperatureChange: (temp: number) => void;
+  onMaxTokensChange: (tokens: number) => void;
+  messages: Message[];
+  input: string;
+  isLoading: boolean;
+  messagesEndRef: React.RefObject<HTMLDivElement>;
+  onInputChange: (input: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  mcpServers: Array<{ name: string; url: string; status: "connected" | "disconnected" }>;
+  onServersChange: (servers: Array<{ name: string; url: string; status: "connected" | "disconnected" }>) => void;
+}) {
+  const { toggleSidebar, open, setOpen } = useSidebar();
+  const mainContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (open && mainContentRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open, setOpen]);
+
+  return (
+    <div className="min-h-screen w-full flex bg-gradient-to-br from-background via-background to-background/95">
+      <AppSidebar
+        model={model}
+        temperature={temperature}
+        maxTokens={maxTokens}
+        onModelChange={onModelChange}
+        onTemperatureChange={onTemperatureChange}
+        onMaxTokensChange={onMaxTokensChange}
+        messages={messages}
+        input={input}
+        isLoading={isLoading}
+        messagesEndRef={messagesEndRef}
+        onInputChange={onInputChange}
+        onSubmit={onSubmit}
+      />
+      
+      <div ref={mainContentRef} className="flex-1 flex flex-col">
+        <header className="h-16 flex items-center border-b border-border/50 bg-card/30 backdrop-blur-sm px-4">
+          <SpinningCube onClick={toggleSidebar} />
+        </header>
 
           <main className="flex-1 container mx-auto px-4 py-6">
             <Tabs defaultValue="mcp" className="w-full h-full">
@@ -116,7 +183,7 @@ const Index = () => {
               </TabsList>
 
               <TabsContent value="mcp" className="space-y-4">
-                <MCPServerPanel servers={mcpServers} onServersChange={setMCPServers} />
+                <MCPServerPanel servers={mcpServers} onServersChange={onServersChange} />
               </TabsContent>
 
               <TabsContent value="account" className="space-y-4">
@@ -126,8 +193,7 @@ const Index = () => {
           </main>
         </div>
       </div>
-    </SidebarProvider>
   );
-};
+}
 
 export default Index;
