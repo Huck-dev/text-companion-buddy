@@ -48,18 +48,13 @@ export function AppSidebar({
   onInputChange,
   onSubmit,
 }: AppSidebarProps) {
-  const { state } = useSidebar();
-
-  if (state === "collapsed") {
-    return (
-      <Sidebar className="w-0 opacity-0 pointer-events-none" collapsible="icon">
-        <SidebarContent />
-      </Sidebar>
-    );
-  }
+  const { open } = useSidebar();
 
   return (
-    <Sidebar className="w-96 transition-all duration-300" collapsible="icon">
+    <Sidebar 
+      className={open ? "w-96" : "w-0"} 
+      collapsible="offcanvas"
+    >
       <SidebarContent className="flex flex-col h-full p-4">
         {/* Chat Section */}
         <SidebarGroup className="flex-1 flex flex-col min-h-0 space-y-2">
