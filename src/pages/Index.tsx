@@ -55,7 +55,6 @@ const Index = () => {
         <header className="h-16 flex items-center justify-between border-b border-border/50 bg-card/50 backdrop-blur-xl px-6 shadow-lg relative ml-20">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
           <div className="flex items-center gap-4 relative z-10 flex-1">
-            <LogoCube />
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
               <TabsList className="grid w-full max-w-2xl grid-cols-3 bg-secondary/50 backdrop-blur-sm">
                 <TabsTrigger value="compute" className="data-[state=active]:bg-primary/20">
@@ -74,7 +73,10 @@ const Index = () => {
             </Tabs>
           </div>
           
-          <UserMenu onNetworkChange={setSelectedNetwork} onAddressesChange={(evm, sol) => setAddresses({ evm, solana: sol })} />
+          <div className="flex items-center gap-4 relative z-10">
+            <LogoCube />
+            <UserMenu onNetworkChange={setSelectedNetwork} onAddressesChange={(evm, sol) => setAddresses({ evm, solana: sol })} />
+          </div>
         </header>
 
         <main className="container mx-auto px-6 py-8">
