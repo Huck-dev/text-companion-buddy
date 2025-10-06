@@ -135,14 +135,18 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="pb-4 mb-4 border-b border-border/50">
+      <div className="pb-3 mb-3">
         <Select value={selectedModel} onValueChange={setSelectedModel}>
-          <SelectTrigger className="w-full bg-secondary/50">
+          <SelectTrigger className="w-full bg-card border-border/50 hover:border-primary/50 transition-all duration-300">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-[100] bg-card border-border backdrop-blur-xl shadow-2xl">
             {MODELS.map((model) => (
-              <SelectItem key={model.value} value={model.value}>
+              <SelectItem 
+                key={model.value} 
+                value={model.value}
+                className="hover:bg-primary/10 cursor-pointer"
+              >
                 {model.label}
               </SelectItem>
             ))}
@@ -153,8 +157,17 @@ export const ChatInterface = () => {
       <ScrollArea className="flex-1 pb-4">
         <div className="space-y-4 pr-4">
           {messages.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <p className="text-sm">Select a model and start chatting</p>
+            <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center">
+              <div className="relative mb-6">
+                <div className="absolute inset-0 blur-2xl opacity-30" style={{ background: "var(--gradient-primary)" }} />
+                <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "var(--gradient-primary)" }}>
+                  <Send className="w-8 h-8 text-primary-foreground" />
+                </div>
+              </div>
+              <p className="text-lg font-medium text-foreground mb-2">Ready to chat</p>
+              <p className="text-sm text-muted-foreground max-w-[250px]">
+                Ask me anything. I'll respond using {MODELS.find(m => m.value === selectedModel)?.label}
+              </p>
             </div>
           ) : (
             messages.map((msg, idx) => (
@@ -178,6 +191,17 @@ export const ChatInterface = () => {
               </div>
             ))
           )}
+          {isLoading && (
+            <div className="flex justify-start animate-slide-up">
+              <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl p-3.5">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: "0ms" }} />
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: "150ms" }} />
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </ScrollArea>
 
@@ -185,15 +209,15 @@ export const ChatInterface = () => {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-1 bg-secondary/50 border-border/50 focus:border-primary/50 transition-all duration-300"
+          placeholder="Type your message..."
+          className="flex-1 bg-card/50 border-border/50 focus:border-primary/50 transition-all duration-300"
           disabled={isLoading}
         />
         <Button 
           type="submit" 
           size="sm"
           disabled={isLoading || !input.trim()}
-          className="transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+          className="transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg px-4"
           style={{ background: "var(--gradient-primary)" }}
         >
           <Send className="w-4 h-4" />
