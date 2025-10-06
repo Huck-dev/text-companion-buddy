@@ -1,8 +1,9 @@
-import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface SettingsPanelProps {
   model: string;
@@ -21,69 +22,63 @@ export const SettingsPanel = ({
   onTemperatureChange,
   onMaxTokensChange,
 }: SettingsPanelProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <Card className="p-6 bg-card border-border">
-      <div className="flex items-center gap-2 mb-6">
-        <Settings className="w-5 h-5 text-primary" />
-        <h2 className="text-lg font-semibold text-foreground">Model Settings</h2>
+    <div className="space-y-2">
+      <div className="space-y-1">
+        <Label className="text-xs text-muted-foreground">Model</Label>
+        <Select value={model} onValueChange={onModelChange}>
+          <SelectTrigger className="h-8 text-sm bg-secondary border-border">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="self-hosted">Self Hosted</SelectItem>
+            <SelectItem value="google/gemini-2.5-flash">Gemini 2.5 Flash</SelectItem>
+            <SelectItem value="google/gemini-2.5-pro">Gemini 2.5 Pro</SelectItem>
+            <SelectItem value="google/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</SelectItem>
+            <SelectItem value="openai/gpt-5-mini">GPT-5 Mini</SelectItem>
+            <SelectItem value="openai/gpt-5">GPT-5</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Label className="text-foreground">Model</Label>
-          <Select value={model} onValueChange={onModelChange}>
-            <SelectTrigger className="bg-secondary border-border">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="self-hosted">Self Hosted</SelectItem>
-              <SelectItem value="google/gemini-2.5-flash">Gemini 2.5 Flash (Free)</SelectItem>
-              <SelectItem value="google/gemini-2.5-pro">Gemini 2.5 Pro (Free)</SelectItem>
-              <SelectItem value="google/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (Free)</SelectItem>
-              <SelectItem value="openai/gpt-5-mini">GPT-5 Mini</SelectItem>
-              <SelectItem value="openai/gpt-5">GPT-5</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            Gemini models are free to use during the promotion period
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <Label className="text-foreground">Temperature</Label>
-            <span className="text-sm text-muted-foreground">{temperature.toFixed(2)}</span>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+          <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          Advanced Settings
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-3 pt-3">
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <Label className="text-xs text-muted-foreground">Temperature</Label>
+              <span className="text-xs text-muted-foreground">{temperature.toFixed(2)}</span>
+            </div>
+            <Slider
+              value={[temperature]}
+              onValueChange={(values) => onTemperatureChange(values[0])}
+              max={1}
+              step={0.01}
+              className="w-full"
+            />
           </div>
-          <Slider
-            value={[temperature]}
-            onValueChange={(values) => onTemperatureChange(values[0])}
-            max={1}
-            step={0.01}
-            className="w-full"
-          />
-          <p className="text-xs text-muted-foreground">
-            Higher values make output more random
-          </p>
-        </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <Label className="text-foreground">Max Tokens</Label>
-            <span className="text-sm text-muted-foreground">{maxTokens}</span>
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <Label className="text-xs text-muted-foreground">Max Tokens</Label>
+              <span className="text-xs text-muted-foreground">{maxTokens}</span>
+            </div>
+            <Slider
+              value={[maxTokens]}
+              onValueChange={(values) => onMaxTokensChange(values[0])}
+              min={50}
+              max={2000}
+              step={50}
+              className="w-full"
+            />
           </div>
-          <Slider
-            value={[maxTokens]}
-            onValueChange={(values) => onMaxTokensChange(values[0])}
-            min={50}
-            max={2000}
-            step={50}
-            className="w-full"
-          />
-          <p className="text-xs text-muted-foreground">
-            Maximum length of the response
-          </p>
-        </div>
-      </div>
-    </Card>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   );
 };

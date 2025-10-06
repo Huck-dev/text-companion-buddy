@@ -80,7 +80,7 @@ const Index = () => {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen w-full flex bg-gradient-to-br from-background via-background to-background/95">
         <AppSidebar
           model={model}

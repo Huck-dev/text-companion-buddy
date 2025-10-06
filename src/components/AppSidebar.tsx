@@ -68,15 +68,15 @@ export function AppSidebar({
 
   return (
     <Sidebar className="w-96" collapsible="icon">
-      <SidebarContent className="flex flex-col h-full">
+      <SidebarContent className="flex flex-col h-full p-4">
         {/* Chat Section */}
-        <SidebarGroup className="flex-1 flex flex-col min-h-0">
-          <SidebarGroupLabel>
+        <SidebarGroup className="flex-1 flex flex-col min-h-0 space-y-2">
+          <SidebarGroupLabel className="text-sm font-semibold px-0">
             <MessageSquare className="w-4 h-4 mr-2" />
             Chat
           </SidebarGroupLabel>
           <SidebarGroupContent className="flex-1 flex flex-col min-h-0">
-            <ScrollArea className="flex-1 pr-4">
+            <ScrollArea className="flex-1">
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full p-4">
                   <div className="text-center space-y-3">
@@ -89,7 +89,7 @@ export function AppSidebar({
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-4 pr-2">
                   {messages.map((message, index) => (
                     <ChatMessage key={index} {...message} />
                   ))}
@@ -105,12 +105,12 @@ export function AppSidebar({
             </ScrollArea>
 
             {/* Input Form */}
-            <form onSubmit={onSubmit} className="relative mt-4">
+            <form onSubmit={onSubmit} className="relative mt-3">
               <Textarea
                 value={input}
                 onChange={(e) => onInputChange(e.target.value)}
                 placeholder="Type your message..."
-                className="pr-12 min-h-[80px] resize-none bg-card border-border focus-visible:ring-primary"
+                className="pr-10 min-h-[70px] resize-none bg-secondary/50 border-border focus-visible:ring-primary text-sm"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -122,12 +122,12 @@ export function AppSidebar({
                 type="submit"
                 size="icon"
                 disabled={isLoading || !input.trim()}
-                className="absolute right-2 bottom-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg hover:shadow-primary/30 transition-all duration-300"
+                className="absolute right-2 bottom-2 h-7 w-7 bg-gradient-to-r from-primary to-accent hover:shadow-lg hover:shadow-primary/30 transition-all duration-300"
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3 h-3 animate-spin" />
                 ) : (
-                  <Send className="w-4 h-4" />
+                  <Send className="w-3 h-3" />
                 )}
               </Button>
             </form>
@@ -135,24 +135,20 @@ export function AppSidebar({
         </SidebarGroup>
 
         {/* Settings Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel>
+        <SidebarGroup className="pt-4 border-t border-border/50">
+          <SidebarGroupLabel className="text-sm font-semibold px-0 mb-3">
             <Settings className="w-4 h-4 mr-2" />
             Settings
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SettingsPanel
-                  model={model}
-                  temperature={temperature}
-                  maxTokens={maxTokens}
-                  onModelChange={onModelChange}
-                  onTemperatureChange={onTemperatureChange}
-                  onMaxTokensChange={onMaxTokensChange}
-                />
-              </SidebarMenuItem>
-            </SidebarMenu>
+            <SettingsPanel
+              model={model}
+              temperature={temperature}
+              maxTokens={maxTokens}
+              onModelChange={onModelChange}
+              onTemperatureChange={onTemperatureChange}
+              onMaxTokensChange={onMaxTokensChange}
+            />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
