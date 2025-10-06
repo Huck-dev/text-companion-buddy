@@ -12,13 +12,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import baseLogo from "@/assets/base-logo.jpg";
+import ethereumLogo from "@/assets/ethereum-logo.jpg";
+import arbitrumLogo from "@/assets/arbitrum-logo.jpg";
+import optimismLogo from "@/assets/optimism-logo.jpg";
+import polygonLogo from "@/assets/polygon-logo.jpg";
 
 const NETWORKS = [
-  { name: "Base", chainId: 8453, symbol: "⚡", color: "text-blue-500" },
-  { name: "Ethereum", chainId: 1, symbol: "Ξ", color: "text-purple-500" },
-  { name: "Arbitrum", chainId: 42161, symbol: "◆", color: "text-cyan-500" },
-  { name: "Optimism", chainId: 10, symbol: "🔴", color: "text-red-500" },
-  { name: "Polygon", chainId: 137, symbol: "⬡", color: "text-violet-500" },
+  { name: "Base", chainId: 8453, logo: baseLogo },
+  { name: "Ethereum", chainId: 1, logo: ethereumLogo },
+  { name: "Arbitrum", chainId: 42161, logo: arbitrumLogo },
+  { name: "Optimism", chainId: 10, logo: optimismLogo },
+  { name: "Polygon", chainId: 137, logo: polygonLogo },
 ];
 
 export const UserMenu = () => {
@@ -186,9 +191,11 @@ export const UserMenu = () => {
               variant="outline"
               className="gap-2 border-primary/30 bg-card/50"
             >
-              <span className={`text-lg ${selectedNetwork.color}`}>
-                {selectedNetwork.symbol}
-              </span>
+              <img 
+                src={selectedNetwork.logo} 
+                alt={selectedNetwork.name}
+                className="w-5 h-5 rounded-full object-cover"
+              />
               <span className="font-medium">{selectedNetwork.name}</span>
               <ChevronDown className="w-4 h-4" />
             </Button>
@@ -200,9 +207,11 @@ export const UserMenu = () => {
                 onClick={() => setSelectedNetwork(network)}
                 className="cursor-pointer"
               >
-                <span className={`text-lg mr-2 ${network.color}`}>
-                  {network.symbol}
-                </span>
+                <img 
+                  src={network.logo} 
+                  alt={network.name}
+                  className="w-5 h-5 rounded-full object-cover mr-2"
+                />
                 <span>{network.name}</span>
                 {network.chainId === selectedNetwork.chainId && (
                   <Check className="w-4 h-4 ml-auto" />
