@@ -17,19 +17,22 @@ import ethereumLogo from "@/assets/ethereum-logo.jpg";
 import arbitrumLogo from "@/assets/arbitrum-logo.jpg";
 import optimismLogo from "@/assets/optimism-logo.jpg";
 import polygonLogo from "@/assets/polygon-logo.jpg";
+import solanaLogo from "@/assets/solana-logo.jpg";
 
 const NETWORKS = [
-  { name: "Base", chainId: 8453, logo: baseLogo },
-  { name: "Ethereum", chainId: 1, logo: ethereumLogo },
-  { name: "Arbitrum", chainId: 42161, logo: arbitrumLogo },
-  { name: "Optimism", chainId: 10, logo: optimismLogo },
-  { name: "Polygon", chainId: 137, logo: polygonLogo },
+  { name: "Base", chainId: 8453, logo: baseLogo, type: "evm" },
+  { name: "Ethereum", chainId: 1, logo: ethereumLogo, type: "evm" },
+  { name: "Arbitrum", chainId: 42161, logo: arbitrumLogo, type: "evm" },
+  { name: "Optimism", chainId: 10, logo: optimismLogo, type: "evm" },
+  { name: "Polygon", chainId: 137, logo: polygonLogo, type: "evm" },
+  { name: "Solana", chainId: 0, logo: solanaLogo, type: "solana" },
 ];
 
 export const UserMenu = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string>("");
+  const [evmAddress, setEvmAddress] = useState<string>("");
+  const [solanaAddress, setSolanaAddress] = useState<string>("");
   const [credits, setCredits] = useState<number>(0);
   const [selectedNetwork, setSelectedNetwork] = useState(NETWORKS[0]);
   const [showPasswordInput, setShowPasswordInput] = useState(false);
@@ -37,6 +40,8 @@ export const UserMenu = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
+  const walletAddress = selectedNetwork.type === "solana" ? solanaAddress : evmAddress;
 
   useEffect(() => {
     // Set up auth state listener
@@ -83,7 +88,7 @@ export const UserMenu = () => {
   const loadWalletAddress = async (userId: string) => {
     const { data, error } = await supabase
       .from("profiles")
-      .select("wallet_address")
+      .select("wallet_address, solana_address")
       .eq("id", userId)
       .maybeSingle();
 
@@ -93,18 +98,39 @@ export const UserMenu = () => {
     }
 
     if (data?.wallet_address) {
-      setWalletAddress(data.wallet_address);
+      setEvmAddress(data.wallet_address);
     } else {
-      // Create profile if it doesn't exist
-      const newAddress = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(20)))
+      // Create EVM address if it doesn't exist
+      const newEvmAddress = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(20)))
         .map(b => b.toString(16).padStart(2, '0')).join('');
       
       const { error: insertError } = await supabase
         .from("profiles")
-        .insert({ id: userId, wallet_address: newAddress });
+        .update({ wallet_address: newEvmAddress })
+        .eq("id", userId);
       
       if (!insertError) {
-        setWalletAddress(newAddress);
+        setEvmAddress(newEvmAddress);
+      }
+    }
+
+    if (data?.solana_address) {
+      setSolanaAddress(data.solana_address);
+    } else {
+      // Create Solana address if it doesn't exist (simplified base58-like format)
+      const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+      const newSolanaAddress = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+        .map(b => chars[b % chars.length])
+        .join('');
+      
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .update({ solana_address: newSolanaAddress })
+        .eq("id", userId);
+      
+      if (!insertError) {
+        setSolanaAddress(newSolanaAddress);
+        toast.success("Solana address generated!");
       }
     }
   };
