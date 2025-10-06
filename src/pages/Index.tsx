@@ -4,6 +4,7 @@ import { UnifiedServersPanel } from "@/components/UnifiedServersPanel";
 import { UserMenu } from "@/components/UserMenu";
 import { CreditsPanel } from "@/components/CreditsPanel";
 import { AccountsListPanel } from "@/components/AccountsListPanel";
+import { AccountManager } from "@/components/AccountManager";
 import { Button } from "@/components/ui/button";
 import { LogoCube } from "@/components/LogoCube";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -58,13 +59,18 @@ const Index = () => {
           </SheetHeader>
           
           <Tabs defaultValue="account" className="mt-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="account">My Account</TabsTrigger>
-              <TabsTrigger value="accounts">All Accounts</TabsTrigger>
+              <TabsTrigger value="manage">Manage</TabsTrigger>
+              <TabsTrigger value="accounts">All Users</TabsTrigger>
             </TabsList>
             
             <TabsContent value="account" className="mt-4">
               <CreditsPanel selectedNetwork={selectedNetwork} addresses={addresses} />
+            </TabsContent>
+            
+            <TabsContent value="manage" className="mt-4">
+              <AccountManager />
             </TabsContent>
             
             <TabsContent value="accounts" className="mt-4">
