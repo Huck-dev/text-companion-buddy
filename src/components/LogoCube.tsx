@@ -1,52 +1,53 @@
 import { useRef, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Mesh, Vector2 } from 'three';
-import { useTexture } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Mesh } from 'three';
 
-function Cube({ mousePosition }: { mousePosition: Vector2 }) {
+function Cube({ isHovered }: { isHovered: boolean }) {
   const meshRef = useRef<Mesh>(null);
-  const texture = useTexture('/src/assets/logo-cube.png');
 
-  useFrame(() => {
+  useFrame((state, delta) => {
     if (meshRef.current) {
-      // Smoothly interpolate rotation based on mouse position
-      meshRef.current.rotation.y += (mousePosition.x * Math.PI - meshRef.current.rotation.y) * 0.1;
-      meshRef.current.rotation.x += (mousePosition.y * Math.PI - meshRef.current.rotation.x) * 0.1;
+      meshRef.current.rotation.x += delta * 0.8;
+      meshRef.current.rotation.y += delta * 0.8;
     }
   });
 
   return (
     <mesh ref={meshRef}>
-      <boxGeometry args={[1.5, 1.5, 1.5]} />
+      <boxGeometry args={[1.2, 1.2, 1.2]} />
       <meshStandardMaterial 
-        map={texture}
-        metalness={0.3}
-        roughness={0.4}
+        color="#FFD700"
+        metalness={1}
+        roughness={0.1}
+        emissive="#FFD700"
+        emissiveIntensity={isHovered ? 0.3 : 0}
       />
     </mesh>
   );
 }
 
 export function LogoCube() {
-  const [mousePosition, setMousePosition] = useState(new Vector2(0, 0));
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-    setMousePosition(new Vector2(x, y));
-  };
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
-      onMouseMove={handleMouseMove}
-      className="w-14 h-14 rounded-lg overflow-hidden bg-white shadow-md cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`w-14 h-14 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 ${
+        isHovered ? 'shadow-[0_0_30px_rgba(255,215,0,0.6)]' : 'shadow-md'
+      }`}
+      style={{ background: 'rgba(255, 255, 255, 0.1)' }}
     >
-      <Canvas camera={{ position: [0, 0, 4], fov: 45 }}>
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[5, 5, 5]} intensity={1.2} />
-        <pointLight position={[-5, -5, -5]} intensity={0.8} />
-        <Cube mousePosition={mousePosition} />
+      <Canvas camera={{ position: [0, 0, 3.5], fov: 45 }}>
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[5, 5, 5]} intensity={1.5} />
+        <pointLight 
+          position={[0, 0, -5]} 
+          intensity={isHovered ? 2 : 0} 
+          color="#FFD700"
+          distance={10}
+        />
+        <Cube isHovered={isHovered} />
       </Canvas>
     </div>
   );
