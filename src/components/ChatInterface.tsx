@@ -33,13 +33,7 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="pb-4 border-b border-border/50">
-        <h2 className="text-lg font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-          AI Assistant
-        </h2>
-      </div>
-      
-      <ScrollArea className="flex-1 py-4">
+      <ScrollArea className="flex-1 pb-4">
         <div className="space-y-4 pr-4">
           {messages.map((msg, idx) => (
             <div
