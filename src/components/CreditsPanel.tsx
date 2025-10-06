@@ -18,9 +18,12 @@ export const MODEL_COSTS = {
 
 export const CreditsPanel = ({ selectedNetwork }: { selectedNetwork: { name: string; chainId: number; type: string } | null }) => {
   const [credits, setCredits] = useState<number>(0);
-  const [walletAddress, setWalletAddress] = useState<string>("");
+  const [evmAddress, setEvmAddress] = useState<string>("");
+  const [solanaAddress, setSolanaAddress] = useState<string>("");
 
-  // Update USDC_NETWORKS based on selected network
+  const walletAddress = selectedNetwork?.type === "solana" ? solanaAddress : evmAddress;
+
+  // Update USDC_NETWORKS based on selected network - only EVM networks support USDC deposits
   const USDC_NETWORKS = [
     { name: "Base", chainId: 8453, active: selectedNetwork?.name === "Base" },
     { name: "Ethereum", chainId: 1, active: selectedNetwork?.name === "Ethereum" },
@@ -40,7 +43,7 @@ export const CreditsPanel = ({ selectedNetwork }: { selectedNetwork: { name: str
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("wallet_address")
+      .select("wallet_address, solana_address")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -50,19 +53,41 @@ export const CreditsPanel = ({ selectedNetwork }: { selectedNetwork: { name: str
     }
 
     if (data?.wallet_address) {
-      setWalletAddress(data.wallet_address);
+      setEvmAddress(data.wallet_address);
     } else {
-      // Create profile if it doesn't exist
+      // Create EVM address if it doesn't exist
       const newAddress = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(20)))
         .map(b => b.toString(16).padStart(2, '0')).join('');
       
       const { error: insertError } = await supabase
         .from("profiles")
-        .insert({ id: user.id, wallet_address: newAddress });
+        .update({ wallet_address: newAddress })
+        .eq("id", user.id);
       
       if (!insertError) {
-        setWalletAddress(newAddress);
-        toast.success("Wallet address generated!");
+        setEvmAddress(newAddress);
+      }
+    }
+
+    // @ts-ignore - solana_address column exists
+    if (data?.solana_address) {
+      // @ts-ignore
+      setSolanaAddress(data.solana_address);
+    } else {
+      // Create Solana address if it doesn't exist
+      const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+      const newSolanaAddress = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+        .map(b => chars[b % chars.length])
+        .join('');
+      
+      // @ts-ignore
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .update({ solana_address: newSolanaAddress })
+        .eq("id", user.id);
+      
+      if (!insertError) {
+        setSolanaAddress(newSolanaAddress);
       }
     }
   };
@@ -135,7 +160,9 @@ export const CreditsPanel = ({ selectedNetwork }: { selectedNetwork: { name: str
               Fund Credits with USDC
             </CardTitle>
             <CardDescription className="text-xs">
-              Send USDC on Base network to your wallet
+              {selectedNetwork?.type === "solana" 
+                ? "Solana USDC deposits coming soon" 
+                : "Send USDC on supported EVM networks to your wallet"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -157,24 +184,33 @@ export const CreditsPanel = ({ selectedNetwork }: { selectedNetwork: { name: str
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-xs text-muted-foreground">
-                    <p className="font-semibold mb-2">Supported Networks:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {USDC_NETWORKS.map((network) => (
-                        <Badge 
-                          key={network.chainId}
-                          variant={network.active ? "default" : "secondary"}
-                          className="text-xs"
-                        >
-                          {network.name} {network.active && "✓"}
-                        </Badge>
-                      ))}
+                  {selectedNetwork?.type === "evm" ? (
+                    <>
+                      <div className="text-xs text-muted-foreground">
+                        <p className="font-semibold mb-2">Supported Networks:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {USDC_NETWORKS.map((network) => (
+                            <Badge 
+                              key={network.chainId}
+                              variant={network.active ? "default" : "secondary"}
+                              className="text-xs"
+                            >
+                              {network.name} {network.active && "✓"}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="text-xs space-y-1 text-muted-foreground pt-2">
+                        <p><strong>Token:</strong> USDC (ERC-20)</p>
+                        <p><strong>Rate:</strong> 1 USDC = 10 Credits</p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-xs text-muted-foreground bg-muted/30 rounded p-3">
+                      <p className="font-semibold mb-1">Solana Support Coming Soon</p>
+                      <p>USDC deposits on Solana will be available in a future update. For now, please use an EVM network.</p>
                     </div>
-                  </div>
-                  <div className="text-xs space-y-1 text-muted-foreground pt-2">
-                    <p><strong>Token:</strong> USDC (ERC-20)</p>
-                    <p><strong>Rate:</strong> 1 USDC = 10 Credits</p>
-                  </div>
+                  )}
                 </div>
                 <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 text-xs">
                   Credits are automatically added when USDC is received
