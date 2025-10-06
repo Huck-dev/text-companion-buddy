@@ -45,29 +45,94 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      // Map "self-hosted" to actual Gemini model
       const actualModel = model === "self-hosted" ? "google/gemini-2.5-flash" : model;
-      
-      const { data, error } = await supabase.functions.invoke("text-completion", {
-        body: {
-          prompt: input,
-          settings: {
-            model: actualModel,
-            temperature,
-            max_tokens: maxTokens,
-          },
+      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+
+      const resp = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          model: actualModel,
+          temperature,
+          max_tokens: maxTokens,
+        }),
       });
 
-      if (error) throw error;
+      if (resp.status === 429) {
+        toast({
+          title: "Rate Limit",
+          description: "Too many requests. Please try again later.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.choices[0].message.content || "No response generated",
-        toolCalls: data.choices[0].message.tool_calls,
-      };
+      if (resp.status === 402) {
+        toast({
+          title: "Payment Required",
+          description: "Please add credits to your workspace.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      if (!resp.ok || !resp.body) {
+        throw new Error("Failed to start stream");
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let streamDone = false;
+      let assistantContent = "";
+
+      // Add empty assistant message
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              assistantContent += content;
+              setMessages((prev) => {
+                const newMessages = [...prev];
+                newMessages[newMessages.length - 1] = {
+                  role: "assistant",
+                  content: assistantContent,
+                };
+                return newMessages;
+              });
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
     } catch (error: any) {
       console.error("Error:", error);
       toast({
@@ -135,6 +200,7 @@ function MainLayout({
 }) {
   const { toggleSidebar, open, setOpen } = useSidebar();
   const mainContentRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState("mcp");
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -165,22 +231,24 @@ function MainLayout({
       />
       
       <div ref={mainContentRef} className="flex-1 flex flex-col">
-        <header className="h-16 flex items-center border-b border-border/50 bg-card/30 backdrop-blur-sm px-4">
+        <header className="h-16 flex items-center border-b border-border/50 bg-card/30 backdrop-blur-sm px-4 gap-4">
           <SpinningCube onClick={toggleSidebar} />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="mcp">
+                <Server className="w-4 h-4 mr-2" />
+                MCP
+              </TabsTrigger>
+              <TabsTrigger value="account">
+                <User className="w-4 h-4 mr-2" />
+                Account
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </header>
 
           <main className="flex-1 container mx-auto px-4 py-6">
-            <Tabs defaultValue="mcp" className="w-full h-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="mcp">
-                  <Server className="w-4 h-4 mr-2" />
-                  MCP
-                </TabsTrigger>
-                <TabsTrigger value="account">
-                  <User className="w-4 h-4 mr-2" />
-                  Account
-                </TabsTrigger>
-              </TabsList>
+            <Tabs value={activeTab} className="w-full h-full">
 
               <TabsContent value="mcp" className="space-y-4">
                 <MCPServerPanel servers={mcpServers} onServersChange={onServersChange} />
