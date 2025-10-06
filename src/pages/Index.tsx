@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Server, User, Cpu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Server, User, Cpu, MessageCircle } from "lucide-react";
 import { ServersPanel } from "@/components/ServersPanel";
 import { CreditsPanel } from "@/components/CreditsPanel";
 import { ComputePanel } from "@/components/ComputePanel";
 import { UserMenu } from "@/components/UserMenu";
+import { ChatInterface } from "@/components/ChatInterface";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("compute");
+  const [showChat, setShowChat] = useState(false);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-background/95">
@@ -29,8 +32,20 @@ const Index = () => {
           </TabsList>
         </Tabs>
         
-        <UserMenu />
+        <div className="flex items-center gap-2">
+          <UserMenu />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowChat(!showChat)}
+            className="border-primary/30"
+          >
+            <MessageCircle className="w-4 h-4" />
+          </Button>
+        </div>
       </header>
+
+      {showChat && <ChatInterface onClose={() => setShowChat(false)} />}
 
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} className="w-full">

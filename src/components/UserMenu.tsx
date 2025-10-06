@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Wallet, Copy, Check } from "lucide-react";
+import { Wallet, Copy, Check, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User, Session } from "@supabase/supabase-js";
@@ -12,7 +10,7 @@ export const UserMenu = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [walletAddress, setWalletAddress] = useState<string>("");
-  const [showAuth, setShowAuth] = useState(false);
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -106,7 +104,7 @@ export const UserMenu = () => {
         title: "Success",
         description: "Logged in successfully",
       });
-      setShowAuth(false);
+      setShowPasswordInput(false);
       setPassword("");
     } catch (error: any) {
       toast({
@@ -161,41 +159,43 @@ export const UserMenu = () => {
     );
   }
 
+  if (showPasswordInput) {
+    return (
+      <form onSubmit={handleAuth} className="flex items-center gap-2">
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter password"
+          className="w-48"
+          autoFocus
+          disabled={isLoading}
+          autoComplete="current-password"
+        />
+        <Button type="submit" size="sm" disabled={isLoading}>
+          {isLoading ? "..." : <LogIn className="w-4 h-4" />}
+        </Button>
+        <Button 
+          type="button" 
+          variant="ghost" 
+          size="sm"
+          onClick={() => {
+            setShowPasswordInput(false);
+            setPassword("");
+          }}
+        >
+          Cancel
+        </Button>
+      </form>
+    );
+  }
+
   return (
-    <>
-      <Button
-        className="bg-primary/20 border border-primary/30 hover:bg-primary/30"
-        onClick={() => setShowAuth(true)}
-      >
-        LOGIN
-      </Button>
-
-      <Dialog open={showAuth} onOpenChange={setShowAuth}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Enter Password</DialogTitle>
-          </DialogHeader>
-
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                autoComplete="current-password"
-              />
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Loading..." : "LOGIN"}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </>
+    <Button
+      className="bg-primary/20 border border-primary/30 hover:bg-primary/30"
+      onClick={() => setShowPasswordInput(true)}
+    >
+      LOGIN
+    </Button>
   );
 };
