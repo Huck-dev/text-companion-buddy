@@ -8,45 +8,47 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 25% 5%;
-    --foreground: 210 40% 98%;
+    --background: 145 30% 8%;
+    --foreground: 145 15% 95%;
 
-    --card: 220 20% 8%;
-    --card-foreground: 210 40% 98%;
+    --card: 145 25% 12%;
+    --card-foreground: 145 15% 95%;
 
-    --popover: 220 20% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 145 25% 12%;
+    --popover-foreground: 145 15% 95%;
 
-    --primary: 263 70% 60%;
-    --primary-foreground: 210 40% 98%;
-    --primary-glow: 263 70% 70%;
+    --primary: 155 65% 55%;
+    --primary-foreground: 145 30% 10%;
+    --primary-glow: 155 70% 65%;
 
-    --secondary: 220 15% 15%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 145 20% 18%;
+    --secondary-foreground: 145 15% 95%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 145 20% 18%;
+    --muted-foreground: 145 15% 70%;
 
-    --accent: 280 65% 55%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 45 85% 60%;
+    --accent-foreground: 145 30% 10%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 145 15% 95%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 263 70% 60%;
+    --border: 145 20% 22%;
+    --input: 145 20% 22%;
+    --ring: 155 65% 55%;
 
     --radius: 0.75rem;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(263 70% 60%), hsl(280 65% 55%));
-    --gradient-card: linear-gradient(180deg, hsl(220 20% 10%), hsl(220 20% 8%));
-    --gradient-subtle: linear-gradient(180deg, hsl(220 25% 6%), hsl(220 25% 5%));
+    /* Solarpunk Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(155 65% 55%), hsl(175 60% 50%));
+    --gradient-card: linear-gradient(180deg, hsl(145 25% 14%), hsl(145 25% 12%));
+    --gradient-subtle: linear-gradient(180deg, hsl(145 30% 10%), hsl(145 30% 8%));
+    --gradient-nature: linear-gradient(135deg, hsl(155 65% 55%), hsl(45 85% 60%));
     
     /* Shadows and Effects */
-    --shadow-glow: 0 0 40px hsl(263 70% 60% / 0.3);
-    --shadow-card: 0 8px 32px hsl(220 25% 3% / 0.6);
+    --shadow-glow: 0 0 40px hsl(155 65% 55% / 0.3);
+    --shadow-card: 0 8px 32px hsl(145 30% 5% / 0.6);
+    --shadow-nature: 0 4px 20px hsl(155 65% 55% / 0.2);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
