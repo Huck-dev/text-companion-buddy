@@ -12,14 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { CreditsPanel } from "@/components/CreditsPanel";
 import baseLogo from "@/assets/base-logo.jpg";
 import ethereumLogo from "@/assets/ethereum-logo.jpg";
 import arbitrumLogo from "@/assets/arbitrum-logo.jpg";
@@ -270,36 +262,14 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange }: { onNetworkChan
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              className="gap-2 border-primary/30 bg-card/50 hover:bg-primary/10"
-            >
-              <span className="font-mono text-sm">{shortenAddress(walletAddress)}</span>
-              <Wallet className="w-3 h-3" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Account Details</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  className="gap-2"
-                  onClick={copyAddress}
-                  size="sm"
-                >
-                  <span className="font-mono text-xs">{walletAddress}</span>
-                  {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                </Button>
-              </div>
-              <CreditsPanel selectedNetwork={selectedNetwork} addresses={{ evm: evmAddress, solana: solanaAddress }} />
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button
+          variant="outline"
+          className="gap-2 border-primary/30 bg-card/50"
+          onClick={copyAddress}
+        >
+          <span className="font-mono text-sm">{shortenAddress(walletAddress)}</span>
+          {copied ? <Check className="w-3 h-3" /> : <Wallet className="w-3 h-3" />}
+        </Button>
 
         <Button variant="ghost" size="sm" onClick={handleLogout}>
           Logout

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Server, X } from "lucide-react";
 import { UnifiedServersPanel } from "@/components/UnifiedServersPanel";
 import { UserMenu } from "@/components/UserMenu";
-import { ChatInterface } from "@/components/ChatInterface";
+import { CreditsPanel } from "@/components/CreditsPanel";
 import { Button } from "@/components/ui/button";
 import { LogoCube } from "@/components/LogoCube";
 
@@ -13,7 +13,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen w-full flex relative" style={{ background: "var(--gradient-hero)" }}>
-      {/* Collapsible Chat Interface */}
+      {/* Collapsible Account Sidebar */}
       <div
         className={`fixed left-0 top-0 h-full transition-all duration-500 ease-in-out z-40 ${
           isChatOpen ? "translate-x-0" : "-translate-x-full"
@@ -21,8 +21,11 @@ const Index = () => {
         style={{ width: "420px" }}
       >
         <div className="h-full border-r border-border/50 backdrop-blur-xl bg-card/95 shadow-2xl">
-          <div className="p-6 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-4">
+          <div className="p-6 h-full flex flex-col overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Account
+              </h2>
               <Button
                 variant="ghost"
                 size="icon"
@@ -32,8 +35,8 @@ const Index = () => {
                 <X className="w-5 h-5" />
               </Button>
             </div>
-            <div className="flex-1 min-h-0">
-              <ChatInterface />
+            <div className="flex-1">
+              <CreditsPanel selectedNetwork={selectedNetwork} addresses={addresses} />
             </div>
           </div>
         </div>

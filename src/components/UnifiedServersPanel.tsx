@@ -58,7 +58,7 @@ interface ComputeExecution {
 export const UnifiedServersPanel = () => {
   const [items, setItems] = useState<UnifiedItem[]>([]);
   const [executions, setExecutions] = useState<ComputeExecution[]>([]);
-  const [filterType, setFilterType] = useState<"all" | "host" | "server">("all");
+  const [viewMode, setViewMode] = useState<"all" | "hosts" | "servers">("all");
   const [filterServerType, setFilterServerType] = useState<"all" | "mcp" | "a2a" | "misc">("all");
   const [showAddItem, setShowAddItem] = useState(false);
   const [addItemType, setAddItemType] = useState<"host" | "server">("host");
@@ -274,32 +274,48 @@ export const UnifiedServersPanel = () => {
   };
 
   const filteredItems = items.filter(item => {
-    if (filterType !== "all" && item.type !== filterType) return false;
+    if (viewMode === "hosts" && item.type !== "host") return false;
+    if (viewMode === "servers" && item.type !== "server") return false;
     if (filterServerType !== "all" && item.server_type !== filterServerType) return false;
     return true;
   });
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4 animate-slide-up">
-        <div className="flex gap-2 flex-wrap flex-1">
-          <Select value={filterType} onValueChange={(v: any) => setFilterType(v)}>
-            <SelectTrigger className="w-40">
-              <Filter className="w-4 h-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="host">Host Servers</SelectItem>
-              <SelectItem value="server">Servers</SelectItem>
-            </SelectContent>
-          </Select>
+      <div className="flex items-center justify-between gap-4 animate-slide-up flex-wrap">
+        <div className="flex gap-2 items-center">
+          <div className="flex gap-1 p-1 rounded-lg bg-secondary/50 backdrop-blur-sm">
+            <Button
+              variant={viewMode === "all" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("all")}
+              className={viewMode === "all" ? "bg-primary/20" : ""}
+            >
+              All
+            </Button>
+            <Button
+              variant={viewMode === "hosts" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("hosts")}
+              className={viewMode === "hosts" ? "bg-primary/20" : ""}
+            >
+              Hosts
+            </Button>
+            <Button
+              variant={viewMode === "servers" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("servers")}
+              className={viewMode === "servers" ? "bg-primary/20" : ""}
+            >
+              Servers
+            </Button>
+          </div>
 
           <Select value={filterServerType} onValueChange={(v: any) => setFilterServerType(v)}>
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background z-50">
               <SelectItem value="all">All Protocols</SelectItem>
               <SelectItem value="mcp">MCP</SelectItem>
               <SelectItem value="a2a">A2A</SelectItem>
@@ -314,7 +330,7 @@ export const UnifiedServersPanel = () => {
           style={{ background: "var(--gradient-primary)" }}
         >
           <Plus className="w-4 h-4" />
-          Add Infrastructure
+          Add Server
         </Button>
       </div>
 
@@ -462,7 +478,7 @@ export const UnifiedServersPanel = () => {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="infrastructure">
             <Server className="w-4 h-4 mr-2" />
-            Infrastructure
+            Servers
           </TabsTrigger>
           <TabsTrigger value="executions">
             <Cpu className="w-4 h-4 mr-2" />
