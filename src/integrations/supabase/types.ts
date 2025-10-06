@@ -85,6 +85,9 @@ export type Database = {
       compute_hosts: {
         Row: {
           capabilities: Json | null
+          compatible_server_types:
+            | Database["public"]["Enums"]["server_type"][]
+            | null
           created_at: string
           endpoint: string
           id: string
@@ -103,6 +106,9 @@ export type Database = {
         }
         Insert: {
           capabilities?: Json | null
+          compatible_server_types?:
+            | Database["public"]["Enums"]["server_type"][]
+            | null
           created_at?: string
           endpoint: string
           id?: string
@@ -121,6 +127,9 @@ export type Database = {
         }
         Update: {
           capabilities?: Json | null
+          compatible_server_types?:
+            | Database["public"]["Enums"]["server_type"][]
+            | null
           created_at?: string
           endpoint?: string
           id?: string
@@ -210,6 +219,48 @@ export type Database = {
           id?: string
           model_used?: string | null
           transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      servers: {
+        Row: {
+          app_url: string | null
+          code: string | null
+          created_at: string
+          description: string | null
+          endpoint: string
+          id: string
+          is_public: boolean
+          name: string
+          server_type: Database["public"]["Enums"]["server_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_url?: string | null
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          endpoint: string
+          id?: string
+          is_public?: boolean
+          name: string
+          server_type: Database["public"]["Enums"]["server_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_url?: string | null
+          code?: string | null
+          created_at?: string
+          description?: string | null
+          endpoint?: string
+          id?: string
+          is_public?: boolean
+          name?: string
+          server_type?: Database["public"]["Enums"]["server_type"]
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

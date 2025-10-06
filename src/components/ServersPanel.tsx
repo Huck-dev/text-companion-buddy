@@ -1,147 +1,204 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Plus, Server, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Server, Plus, Monitor, Code, Lock, Unlock, Play } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-interface ServerInfo {
+interface ServerDef {
+  id: string;
+  user_id: string;
   name: string;
-  url: string;
-  type: "mcp" | "a2a" | "misc";
-  status: "connected" | "disconnected";
-  schema?: Record<string, any>;
+  server_type: "mcp" | "a2a" | "misc";
+  endpoint: string;
+  is_public: boolean;
+  code: string | null;
+  app_url: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-interface ServersPanelProps {
-  servers: ServerInfo[];
-  onServersChange: (servers: ServerInfo[]) => void;
+interface ComputeHost {
+  id: string;
+  name: string;
+  server_type: string;
+  status: string;
+  location: string | null;
+  compatible_server_types: string[];
 }
 
-export const ServersPanel = ({ servers, onServersChange }: ServersPanelProps) => {
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newServer, setNewServer] = useState({ name: "", url: "", type: "misc" as "mcp" | "a2a" | "misc" });
-  const [detecting, setDetecting] = useState(false);
+export const ServersPanel = () => {
+  const [servers, setServers] = useState<ServerDef[]>([]);
+  const [hosts, setHosts] = useState<ComputeHost[]>([]);
+  const [selectedServer, setSelectedServer] = useState<ServerDef | null>(null);
+  const [showAddServer, setShowAddServer] = useState(false);
+  const [newServer, setNewServer] = useState({
+    name: "",
+    endpoint: "",
+    description: "",
+    is_public: false,
+    code: "",
+    app_url: "",
+  });
+  const { toast } = useToast();
 
-  const detectServerType = async (url: string): Promise<{ type: "mcp" | "a2a" | "misc"; schema?: Record<string, any> }> => {
+  useEffect(() => {
+    loadServers();
+    loadHosts();
+  }, []);
+
+  const loadServers = async () => {
+    const { data, error } = await supabase
+      .from("servers")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error loading servers:", error);
+      return;
+    }
+    setServers(data || []);
+  };
+
+  const loadHosts = async () => {
+    const { data, error } = await supabase
+      .from("compute_hosts")
+      .select("*")
+      .eq("status", "online");
+
+    if (error) {
+      console.error("Error loading hosts:", error);
+      return;
+    }
+    setHosts(data || []);
+  };
+
+  const detectServerType = async (endpoint: string): Promise<"mcp" | "a2a" | "misc"> => {
     try {
-      const infoUrl = url.endsWith('/') ? `${url}info` : `${url}/info`;
-      const response = await fetch(infoUrl, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+      const infoUrl = endpoint.endsWith('/') ? `${endpoint}info` : `${endpoint}/info`;
+      const response = await fetch(infoUrl);
+      if (!response.ok) return "misc";
+      
+      const data = await response.json();
+      
+      if (data.protocol === "mcp" || data.mcpVersion || data.protocolVersion) {
+        return "mcp";
+      }
+      
+      if (data.agentCapabilities || data.agentType || data.a2aVersion) {
+        return "a2a";
+      }
+      
+      return "misc";
+    } catch (error) {
+      console.error("Error detecting server type:", error);
+      return "misc";
+    }
+  };
+
+  const addServer = async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to add a server.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const detectedType = await detectServerType(newServer.endpoint);
+    
+    const { error } = await supabase.from("servers").insert({
+      user_id: userData.user.id,
+      name: newServer.name,
+      endpoint: newServer.endpoint,
+      description: newServer.description || null,
+      server_type: detectedType,
+      is_public: newServer.is_public,
+      code: newServer.code || null,
+      app_url: newServer.app_url || null,
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Server Added",
+      description: `Detected as ${detectedType.toUpperCase()} server`,
+    });
+
+    await loadServers();
+    setShowAddServer(false);
+    setNewServer({ 
+      name: "", 
+      endpoint: "", 
+      description: "", 
+      is_public: false,
+      code: "",
+      app_url: "",
+    });
+  };
+
+  const getCompatibleHosts = (serverType: string) => {
+    return hosts.filter(host => 
+      host.compatible_server_types?.includes(serverType) || 
+      host.server_type === serverType
+    );
+  };
+
+  const executeServer = async (serverId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("execute-server", {
+        body: { server_id: serverId },
       });
 
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
-      }
+      if (error) throw error;
 
-      const info = await response.json();
-      
-      // Detect server type based on response structure
-      if (info.protocol === 'mcp' || info.type === 'mcp' || info.mcpVersion) {
-        return { type: 'mcp', schema: info };
-      } else if (info.protocol === 'a2a' || info.type === 'a2a' || info.agentCapabilities) {
-        return { type: 'a2a', schema: info };
-      } else {
-        return { type: 'misc', schema: info };
-      }
-    } catch (error) {
-      console.error('Failed to detect server type:', error);
-      return { type: 'misc' };
+      toast({
+        title: "Execution Started",
+        description: "Server execution has been initiated.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Execution Failed",
+        description: error.message,
+        variant: "destructive",
+      });
     }
-  };
-
-  const handleDetectType = async () => {
-    if (!newServer.url) {
-      toast.error("Please enter a URL first");
-      return;
-    }
-
-    setDetecting(true);
-    try {
-      const { type, schema } = await detectServerType(newServer.url);
-      setNewServer({ ...newServer, type });
-      toast.success(`Detected server type: ${type.toUpperCase()}`);
-      console.log('Server schema:', schema);
-    } catch (error) {
-      toast.error("Failed to detect server type");
-    } finally {
-      setDetecting(false);
-    }
-  };
-
-  const handleAddServer = async () => {
-    if (!newServer.name || !newServer.url) {
-      toast.error("Please enter both name and URL");
-      return;
-    }
-
-    // Detect server type if not already detected
-    let serverType = newServer.type;
-    let schema;
-    
-    if (newServer.type === 'misc') {
-      const detected = await detectServerType(newServer.url);
-      serverType = detected.type;
-      schema = detected.schema;
-    }
-
-    const server: ServerInfo = {
-      name: newServer.name,
-      url: newServer.url,
-      type: serverType,
-      status: "connected",
-      schema
-    };
-
-    onServersChange([...servers, server]);
-    setNewServer({ name: "", url: "", type: "misc" });
-    setShowAddForm(false);
-    toast.success(`${serverType.toUpperCase()} server added successfully!`);
-  };
-
-  const handleRemoveServer = (index: number) => {
-    const updatedServers = servers.filter((_, i) => i !== index);
-    onServersChange(updatedServers);
-    toast.success("Server removed");
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'mcp':
-        return 'bg-blue-500';
-      case 'a2a':
-        return 'bg-purple-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    return status === "connected" ? "bg-green-500" : "bg-red-500";
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Server Management
+            Servers
           </h2>
           <p className="text-muted-foreground">
-            Manage MCP, A2A, and custom servers
+            Manage your MCP, A2A, and custom servers
           </p>
         </div>
-        <Button onClick={() => setShowAddForm(!showAddForm)} className="gap-2">
+        <Button onClick={() => setShowAddServer(true)} className="gap-2">
           <Plus className="w-4 h-4" />
           Add Server
         </Button>
       </div>
 
-      {showAddForm && (
+      {showAddServer && (
         <Card className="p-6 border-primary/30">
           <h3 className="text-lg font-semibold mb-4">Add New Server</h3>
           <div className="space-y-4">
@@ -154,44 +211,49 @@ export const ServersPanel = ({ servers, onServersChange }: ServersPanelProps) =>
               />
             </div>
             <div>
-              <Label>Server URL</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={newServer.url}
-                  onChange={(e) => setNewServer({ ...newServer, url: e.target.value })}
-                  placeholder="https://my-server.com"
-                  className="flex-1"
-                />
-                <Button 
-                  variant="outline" 
-                  onClick={handleDetectType}
-                  disabled={detecting}
-                  className="gap-2"
-                >
-                  <RefreshCw className={`w-4 h-4 ${detecting ? 'animate-spin' : ''}`} />
-                  Detect
-                </Button>
-              </div>
+              <Label>Endpoint URL</Label>
+              <Input
+                value={newServer.endpoint}
+                onChange={(e) => setNewServer({ ...newServer, endpoint: e.target.value })}
+                placeholder="http://localhost:8000"
+              />
             </div>
             <div>
-              <Label>Server Type</Label>
-              <Select 
-                value={newServer.type} 
-                onValueChange={(value: "mcp" | "a2a" | "misc") => setNewServer({ ...newServer, type: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mcp">MCP (Model Context Protocol)</SelectItem>
-                  <SelectItem value="a2a">A2A (Agent-to-Agent)</SelectItem>
-                  <SelectItem value="misc">Misc (Custom)</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Description (Optional)</Label>
+              <Input
+                value={newServer.description}
+                onChange={(e) => setNewServer({ ...newServer, description: e.target.value })}
+                placeholder="Server description"
+              />
+            </div>
+            <div>
+              <Label>Code (Optional)</Label>
+              <Textarea
+                value={newServer.code}
+                onChange={(e) => setNewServer({ ...newServer, code: e.target.value })}
+                placeholder="Paste your server code here..."
+                className="font-mono text-sm h-32"
+              />
+            </div>
+            <div>
+              <Label>App URL (Optional)</Label>
+              <Input
+                value={newServer.app_url}
+                onChange={(e) => setNewServer({ ...newServer, app_url: e.target.value })}
+                placeholder="https://app.example.com"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={newServer.is_public}
+                onCheckedChange={(checked) => setNewServer({ ...newServer, is_public: checked })}
+              />
+              <Label>Make server public</Label>
+              {newServer.is_public ? <Unlock className="w-4 h-4 text-primary" /> : <Lock className="w-4 h-4 text-muted-foreground" />}
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleAddServer}>Add Server</Button>
-              <Button variant="outline" onClick={() => setShowAddForm(false)}>
+              <Button onClick={addServer}>Add Server</Button>
+              <Button variant="outline" onClick={() => setShowAddServer(false)}>
                 Cancel
               </Button>
             </div>
@@ -199,46 +261,121 @@ export const ServersPanel = ({ servers, onServersChange }: ServersPanelProps) =>
         </Card>
       )}
 
-      <div className="space-y-4">
+      <div className="grid gap-4">
         {servers.length === 0 ? (
           <Card className="p-8 text-center">
             <Server className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground">No servers configured yet</p>
+            <p className="text-muted-foreground">No servers added yet</p>
           </Card>
         ) : (
-          servers.map((server, index) => (
-            <Card key={index} className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-2">
+          servers.map((server) => (
+            <Card key={server.id} className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="space-y-2 flex-1">
                   <div className="flex items-center gap-3">
                     <h3 className="text-lg font-semibold">{server.name}</h3>
-                    <Badge className={getTypeColor(server.type)}>
-                      {server.type.toUpperCase()}
-                    </Badge>
-                    <Badge className={getStatusColor(server.status)}>
-                      {server.status}
-                    </Badge>
+                    <Badge variant="secondary">{server.server_type.toUpperCase()}</Badge>
+                    {server.is_public ? (
+                      <Badge variant="outline" className="gap-1">
+                        <Unlock className="w-3 h-3" /> Public
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="gap-1">
+                        <Lock className="w-3 h-3" /> Private
+                      </Badge>
+                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{server.url}</p>
-                  {server.schema && (
-                    <details className="text-xs text-muted-foreground">
-                      <summary className="cursor-pointer hover:text-foreground">
-                        View Schema
-                      </summary>
-                      <pre className="mt-2 p-2 bg-secondary/50 rounded overflow-x-auto">
-                        {JSON.stringify(server.schema, null, 2)}
-                      </pre>
-                    </details>
+                  <p className="text-sm text-muted-foreground">{server.endpoint}</p>
+                  {server.description && (
+                    <p className="text-sm text-muted-foreground">{server.description}</p>
                   )}
                 </div>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => handleRemoveServer(index)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => executeServer(server.id)}
+                    className="gap-2"
+                  >
+                    <Play className="w-4 h-4" />
+                    Execute
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setSelectedServer(selectedServer?.id === server.id ? null : server)}
+                  >
+                    <Code className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
+
+              {selectedServer?.id === server.id && (
+                <Tabs defaultValue="api" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="api" className="gap-2">
+                      <Server className="w-4 h-4" />
+                      API
+                    </TabsTrigger>
+                    <TabsTrigger value="app" className="gap-2" disabled={!server.app_url}>
+                      <Monitor className="w-4 h-4" />
+                      APP
+                    </TabsTrigger>
+                    <TabsTrigger value="content" className="gap-2" disabled={!server.code}>
+                      <Code className="w-4 h-4" />
+                      CONTENT
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="api" className="space-y-4">
+                    <div className="rounded-lg bg-muted p-4">
+                      <h4 className="font-semibold mb-2">Compatible Compute Hosts</h4>
+                      <div className="space-y-2">
+                        {getCompatibleHosts(server.server_type).map((host) => (
+                          <div key={host.id} className="flex items-center justify-between p-2 rounded bg-background">
+                            <div>
+                              <p className="font-medium">{host.name}</p>
+                              <p className="text-sm text-muted-foreground">{host.location || "Unknown location"}</p>
+                            </div>
+                            <Badge variant={host.status === "online" ? "default" : "secondary"}>
+                              {host.status}
+                            </Badge>
+                          </div>
+                        ))}
+                        {getCompatibleHosts(server.server_type).length === 0 && (
+                          <p className="text-sm text-muted-foreground">No compatible hosts available</p>
+                        )}
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="app">
+                    {server.app_url && (
+                      <div className="rounded-lg border overflow-hidden">
+                        <iframe 
+                          src={server.app_url} 
+                          className="w-full h-96"
+                          title={`${server.name} App`}
+                        />
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="content">
+                    {server.code && (
+                      <div className="rounded-lg bg-muted p-4">
+                        <div className="mb-2 text-sm text-muted-foreground flex items-center gap-4">
+                          <span>{server.code.split('\n').length} lines</span>
+                          <span>{server.code.length} B</span>
+                        </div>
+                        <pre className="font-mono text-sm overflow-x-auto p-4 bg-background rounded">
+                          <code>{server.code}</code>
+                        </pre>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              )}
             </Card>
           ))
         )}

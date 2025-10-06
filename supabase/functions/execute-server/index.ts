@@ -31,6 +31,7 @@ serve(async (req) => {
     }
 
     const {
+        server_id,
         server_name,
         function_name,
         parameters = {},
@@ -40,10 +41,32 @@ serve(async (req) => {
         cost_credits = 10,
     } = await req.json();
 
+    // If server_id is provided, fetch server details
+    let serverEndpoint = "";
+    let detectedServerType = server_type;
+    let actualServerName = server_name || "";
+    
+    if (server_id) {
+      const { data: server, error: serverError } = await supabaseClient
+        .from('servers')
+        .select('*')
+        .eq('id', server_id)
+        .single();
+
+      if (serverError) {
+        throw new Error(`Server not found: ${serverError.message}`);
+      }
+      
+      serverEndpoint = server.endpoint;
+      detectedServerType = server.server_type;
+      actualServerName = server.name;
+    }
+
     console.log("Executing function:", {
-      server_name,
+      server_id,
+      server_name: actualServerName,
       function_name,
-      server_type,
+      server_type: detectedServerType,
       required_capabilities,
     });
 
@@ -51,7 +74,7 @@ serve(async (req) => {
     const { data: hostId, error: hostError } = await supabaseClient.rpc("select_best_host", {
       required_capabilities,
       preferred_location,
-      required_server_type: server_type,
+      required_server_type: detectedServerType,
     });
 
     if (hostError || !hostId) {
@@ -81,9 +104,9 @@ serve(async (req) => {
       .insert({
         requester_id: user.id,
         host_id: hostId,
-        server_name,
-        server_type: server_type || 'misc',
-        function_name,
+        server_name: actualServerName,
+        server_type: detectedServerType || 'misc',
+        function_name: function_name || 'execute',
         parameters,
         cost_credits,
         status: "pending",
@@ -110,16 +133,17 @@ serve(async (req) => {
         .update({ status: "running", started_at: new Date().toISOString() })
         .eq("id", execution.id);
 
-      // Call the host endpoint
-      const response = await fetch(`${host.endpoint}/execute`, {
+      // Call the host endpoint (use custom endpoint if provided via server_id)
+      const executeEndpoint = serverEndpoint || `${host.endpoint}/execute`;
+      const response = await fetch(executeEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          server: server_name,
-          server_type: server_type || 'misc',
-          function: function_name,
+          server: actualServerName,
+          server_type: detectedServerType || 'misc',
+          function: function_name || 'execute',
           parameters,
         }),
       });

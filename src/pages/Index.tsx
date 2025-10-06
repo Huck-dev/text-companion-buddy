@@ -24,7 +24,6 @@ const Index = () => {
   const [model, setModel] = useState("google/gemini-2.5-flash");
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(500);
-  const [mcpServers, setMCPServers] = useState<Array<{ name: string; url: string; type: "mcp" | "a2a" | "misc"; status: "connected" | "disconnected" }>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -161,8 +160,6 @@ const Index = () => {
         messagesEndRef={messagesEndRef}
         onInputChange={setInput}
         onSubmit={handleSubmit}
-        mcpServers={mcpServers}
-        onServersChange={setMCPServers}
       />
     </SidebarProvider>
   );
@@ -181,8 +178,6 @@ function MainLayout({
   messagesEndRef,
   onInputChange,
   onSubmit,
-  mcpServers,
-  onServersChange,
 }: {
   model: string;
   temperature: number;
@@ -196,8 +191,6 @@ function MainLayout({
   messagesEndRef: React.RefObject<HTMLDivElement>;
   onInputChange: (input: string) => void;
   onSubmit: (e: React.FormEvent) => void;
-  mcpServers: Array<{ name: string; url: string; type: "mcp" | "a2a" | "misc"; status: "connected" | "disconnected" }>;
-  onServersChange: (servers: Array<{ name: string; url: string; type: "mcp" | "a2a" | "misc"; status: "connected" | "disconnected" }>) => void;
 }) {
   const { toggleSidebar, open, setOpen } = useSidebar();
   const mainContentRef = useRef<HTMLDivElement>(null);
@@ -259,7 +252,7 @@ function MainLayout({
               </TabsContent>
 
               <TabsContent value="servers" className="space-y-4">
-                <ServersPanel servers={mcpServers} onServersChange={onServersChange} />
+                <ServersPanel />
               </TabsContent>
 
               <TabsContent value="account" className="space-y-4">
