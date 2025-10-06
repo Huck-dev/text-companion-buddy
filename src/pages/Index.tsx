@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Server, User } from "lucide-react";
+import { Server, User, Cpu } from "lucide-react";
 import { MCPServerPanel } from "@/components/MCPServerPanel";
 import { CreditsPanel } from "@/components/CreditsPanel";
+import { ComputePanel } from "@/components/ComputePanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
@@ -200,7 +201,7 @@ function MainLayout({
 }) {
   const { toggleSidebar, open, setOpen } = useSidebar();
   const mainContentRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState("mcp");
+  const [activeTab, setActiveTab] = useState("compute");
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -234,7 +235,11 @@ function MainLayout({
         <header className="h-16 flex items-center border-b border-border/50 bg-card/30 backdrop-blur-sm px-4 gap-4">
           <SpinningCube onClick={toggleSidebar} />
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsList className="grid w-full max-w-2xl grid-cols-3">
+              <TabsTrigger value="compute">
+                <Cpu className="w-4 h-4 mr-2" />
+                Compute
+              </TabsTrigger>
               <TabsTrigger value="mcp">
                 <Server className="w-4 h-4 mr-2" />
                 MCP
@@ -249,6 +254,9 @@ function MainLayout({
 
           <main className="flex-1 container mx-auto px-4 py-6">
             <Tabs value={activeTab} className="w-full h-full">
+              <TabsContent value="compute" className="space-y-4">
+                <ComputePanel />
+              </TabsContent>
 
               <TabsContent value="mcp" className="space-y-4">
                 <MCPServerPanel servers={mcpServers} onServersChange={onServersChange} />
