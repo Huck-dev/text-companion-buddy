@@ -1,9 +1,18 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Coins, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const USDC_NETWORKS = [
+  { name: "Base", chainId: 8453, active: true },
+  { name: "Ethereum", chainId: 1, active: false },
+  { name: "Arbitrum", chainId: 42161, active: false },
+  { name: "Optimism", chainId: 10, active: false },
+  { name: "Polygon", chainId: 137, active: false },
+];
 
 export const MODEL_COSTS = {
   "self-hosted": 1,
@@ -128,10 +137,25 @@ export const CreditsPanel = () => {
                     Copy Address
                   </Button>
                 </div>
-                <div className="text-xs space-y-1 text-muted-foreground">
-                  <p><strong>Network:</strong> Base</p>
-                  <p><strong>Token:</strong> USDC (ERC-20)</p>
-                  <p><strong>Rate:</strong> 1 USDC = 10 Credits</p>
+                <div className="space-y-2">
+                  <div className="text-xs text-muted-foreground">
+                    <p className="font-semibold mb-2">Supported Networks:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {USDC_NETWORKS.map((network) => (
+                        <Badge 
+                          key={network.chainId}
+                          variant={network.active ? "default" : "secondary"}
+                          className="text-xs"
+                        >
+                          {network.name} {network.active && "✓"}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-xs space-y-1 text-muted-foreground pt-2">
+                    <p><strong>Token:</strong> USDC (ERC-20)</p>
+                    <p><strong>Rate:</strong> 1 USDC = 10 Credits</p>
+                  </div>
                 </div>
                 <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 text-xs">
                   Credits are automatically added when USDC is received
