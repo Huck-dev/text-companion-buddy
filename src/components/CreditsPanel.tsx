@@ -16,12 +16,10 @@ export const MODEL_COSTS = {
   "openai/gpt-5": 10,
 };
 
-export const CreditsPanel = ({ selectedNetwork }: { selectedNetwork: { name: string; chainId: number; type: string } | null }) => {
+export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: { name: string; chainId: number; type: string } | null; addresses: { evm: string; solana: string } }) => {
   const [credits, setCredits] = useState<number>(0);
-  const [evmAddress, setEvmAddress] = useState<string>("");
-  const [solanaAddress, setSolanaAddress] = useState<string>("");
 
-  const walletAddress = selectedNetwork?.type === "solana" ? solanaAddress : evmAddress;
+  const walletAddress = selectedNetwork?.type === "solana" ? addresses.solana : addresses.evm;
 
   // Update USDC_NETWORKS based on selected network - only EVM networks support USDC deposits
   const USDC_NETWORKS = [
@@ -34,63 +32,9 @@ export const CreditsPanel = ({ selectedNetwork }: { selectedNetwork: { name: str
 
   useEffect(() => {
     fetchCredits();
-    loadWalletAddress();
   }, []);
 
-  const loadWalletAddress = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("wallet_address, solana_address")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error loading wallet:", error);
-      return;
-    }
-
-    if (data?.wallet_address) {
-      setEvmAddress(data.wallet_address);
-    } else {
-      // Create EVM address if it doesn't exist
-      const newAddress = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(20)))
-        .map(b => b.toString(16).padStart(2, '0')).join('');
-      
-      const { error: insertError } = await supabase
-        .from("profiles")
-        .update({ wallet_address: newAddress })
-        .eq("id", user.id);
-      
-      if (!insertError) {
-        setEvmAddress(newAddress);
-      }
-    }
-
-    // @ts-ignore - solana_address column exists
-    if (data?.solana_address) {
-      // @ts-ignore
-      setSolanaAddress(data.solana_address);
-    } else {
-      // Create Solana address if it doesn't exist
-      const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-      const newSolanaAddress = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-        .map(b => chars[b % chars.length])
-        .join('');
-      
-      // @ts-ignore
-      const { error: insertError } = await supabase
-        .from("profiles")
-        .update({ solana_address: newSolanaAddress })
-        .eq("id", user.id);
-      
-      if (!insertError) {
-        setSolanaAddress(newSolanaAddress);
-      }
-    }
-  };
+  // Address loading removed; addresses are now provided by UserMenu via props to avoid mismatches.
 
   const fetchCredits = async () => {
     try {

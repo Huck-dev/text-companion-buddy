@@ -13,6 +13,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("compute");
   const [selectedNetwork, setSelectedNetwork] = useState<{ name: string; chainId: number; type: string } | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [addresses, setAddresses] = useState<{ evm: string; solana: string }>({ evm: "", solana: "" });
 
   return (
     <div className="min-h-screen w-full flex relative" style={{ background: "var(--gradient-hero)" }}>
@@ -75,7 +76,7 @@ const Index = () => {
             </Tabs>
           </div>
           
-          <UserMenu onNetworkChange={setSelectedNetwork} />
+          <UserMenu onNetworkChange={setSelectedNetwork} onAddressesChange={(evm, sol) => setAddresses({ evm, solana: sol })} />
         </header>
 
         <main className="container mx-auto px-6 py-8">
@@ -89,7 +90,7 @@ const Index = () => {
             </TabsContent>
 
             <TabsContent value="account" className="space-y-4 animate-fade-in">
-              <CreditsPanel selectedNetwork={selectedNetwork} />
+              <CreditsPanel selectedNetwork={selectedNetwork} addresses={addresses} />
             </TabsContent>
           </Tabs>
         </main>

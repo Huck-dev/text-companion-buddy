@@ -28,7 +28,7 @@ const NETWORKS = [
   { name: "Solana", chainId: 0, logo: solanaLogo, type: "solana" },
 ];
 
-export const UserMenu = ({ onNetworkChange }: { onNetworkChange: (network: typeof NETWORKS[0]) => void }) => {
+export const UserMenu = ({ onNetworkChange, onAddressesChange }: { onNetworkChange: (network: typeof NETWORKS[0]) => void; onAddressesChange?: (evm: string, solana: string) => void }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [evmAddress, setEvmAddress] = useState<string>("");
@@ -103,6 +103,7 @@ export const UserMenu = ({ onNetworkChange }: { onNetworkChange: (network: typeo
 
     if (data?.wallet_address) {
       setEvmAddress(data.wallet_address);
+      onAddressesChange?.(data.wallet_address, solanaAddress || "");
     } else {
       // Create EVM address if it doesn't exist
       const newEvmAddress = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(20)))
@@ -115,6 +116,7 @@ export const UserMenu = ({ onNetworkChange }: { onNetworkChange: (network: typeo
       
       if (!insertError) {
         setEvmAddress(newEvmAddress);
+        onAddressesChange?.(newEvmAddress, solanaAddress || "");
       }
     }
 
