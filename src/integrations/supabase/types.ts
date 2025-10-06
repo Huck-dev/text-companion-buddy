@@ -227,18 +227,21 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          solana_address: string | null
           updated_at: string | null
           wallet_address: string | null
         }
         Insert: {
           created_at?: string | null
           id: string
+          solana_address?: string | null
           updated_at?: string | null
           wallet_address?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          solana_address?: string | null
           updated_at?: string | null
           wallet_address?: string | null
         }

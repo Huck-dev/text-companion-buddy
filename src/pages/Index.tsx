@@ -11,6 +11,7 @@ import { SidebarProvider, Sidebar, SidebarContent, SidebarTrigger } from "@/comp
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("compute");
+  const [selectedNetwork, setSelectedNetwork] = useState<{ name: string; chainId: number; type: string } | null>(null);
 
   return (
     <SidebarProvider>
@@ -46,7 +47,7 @@ const Index = () => {
               </Tabs>
             </div>
             
-            <UserMenu />
+            <UserMenu onNetworkChange={setSelectedNetwork} />
           </header>
 
           <main className="container mx-auto px-4 py-6">
@@ -60,7 +61,7 @@ const Index = () => {
               </TabsContent>
 
               <TabsContent value="account" className="space-y-4">
-                <CreditsPanel />
+                <CreditsPanel selectedNetwork={selectedNetwork} />
               </TabsContent>
             </Tabs>
           </main>

@@ -6,14 +6,6 @@ import { Coins, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const USDC_NETWORKS = [
-  { name: "Base", chainId: 8453, active: true },
-  { name: "Ethereum", chainId: 1, active: false },
-  { name: "Arbitrum", chainId: 42161, active: false },
-  { name: "Optimism", chainId: 10, active: false },
-  { name: "Polygon", chainId: 137, active: false },
-];
-
 export const MODEL_COSTS = {
   "self-hosted": 1,
   "google/gemini-2.5-flash": 1,
@@ -24,9 +16,18 @@ export const MODEL_COSTS = {
   "openai/gpt-5": 10,
 };
 
-export const CreditsPanel = () => {
+export const CreditsPanel = ({ selectedNetwork }: { selectedNetwork: { name: string; chainId: number; type: string } | null }) => {
   const [credits, setCredits] = useState<number>(0);
   const [walletAddress, setWalletAddress] = useState<string>("");
+
+  // Update USDC_NETWORKS based on selected network
+  const USDC_NETWORKS = [
+    { name: "Base", chainId: 8453, active: selectedNetwork?.name === "Base" },
+    { name: "Ethereum", chainId: 1, active: selectedNetwork?.name === "Ethereum" },
+    { name: "Arbitrum", chainId: 42161, active: selectedNetwork?.name === "Arbitrum" },
+    { name: "Optimism", chainId: 10, active: selectedNetwork?.name === "Optimism" },
+    { name: "Polygon", chainId: 137, active: selectedNetwork?.name === "Polygon" },
+  ];
 
   useEffect(() => {
     fetchCredits();
