@@ -24,10 +24,8 @@ const Index = () => {
         <div className="flex-1 flex flex-col">
           <header className="h-16 flex items-center justify-between border-b border-border/50 bg-card/30 backdrop-blur-sm px-4">
             <div className="flex items-center gap-4">
-              <SidebarTrigger asChild>
-                <Button variant="ghost" size="sm" className="hover:bg-primary/10">
-                  <Bot className="w-5 h-5 text-primary" />
-                </Button>
+              <SidebarTrigger className="hover:bg-primary/10">
+                <Bot className="w-5 h-5 text-primary" />
               </SidebarTrigger>
               
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
