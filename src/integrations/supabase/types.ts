@@ -14,6 +14,167 @@ export type Database = {
   }
   public: {
     Tables: {
+      compute_executions: {
+        Row: {
+          completed_at: string | null
+          cost_credits: number
+          created_at: string
+          error_message: string | null
+          execution_time_ms: number | null
+          function_name: string
+          host_earnings: number | null
+          host_id: string | null
+          id: string
+          mcp_server_name: string
+          parameters: Json | null
+          platform_earnings: number | null
+          requester_id: string
+          result: Json | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["execution_status"]
+        }
+        Insert: {
+          completed_at?: string | null
+          cost_credits: number
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          function_name: string
+          host_earnings?: number | null
+          host_id?: string | null
+          id?: string
+          mcp_server_name: string
+          parameters?: Json | null
+          platform_earnings?: number | null
+          requester_id: string
+          result?: Json | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["execution_status"]
+        }
+        Update: {
+          completed_at?: string | null
+          cost_credits?: number
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          function_name?: string
+          host_earnings?: number | null
+          host_id?: string | null
+          id?: string
+          mcp_server_name?: string
+          parameters?: Json | null
+          platform_earnings?: number | null
+          requester_id?: string
+          result?: Json | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["execution_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compute_executions_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "compute_hosts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compute_hosts: {
+        Row: {
+          capabilities: Json | null
+          created_at: string
+          endpoint: string
+          id: string
+          last_seen_at: string | null
+          location: string | null
+          name: string
+          profit_share_percentage: number | null
+          status: Database["public"]["Enums"]["compute_host_status"]
+          successful_executions: number | null
+          total_earnings: number | null
+          total_executions: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          capabilities?: Json | null
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_seen_at?: string | null
+          location?: string | null
+          name: string
+          profit_share_percentage?: number | null
+          status?: Database["public"]["Enums"]["compute_host_status"]
+          successful_executions?: number | null
+          total_earnings?: number | null
+          total_executions?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          capabilities?: Json | null
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_seen_at?: string | null
+          location?: string | null
+          name?: string
+          profit_share_percentage?: number | null
+          status?: Database["public"]["Enums"]["compute_host_status"]
+          successful_executions?: number | null
+          total_earnings?: number | null
+          total_executions?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      compute_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          execution_id: string | null
+          host_id: string
+          id: string
+          paid_at: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          execution_id?: string | null
+          host_id: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          execution_id?: string | null
+          host_id?: string
+          id?: string
+          paid_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compute_payments_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "compute_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compute_payments_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "compute_hosts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_transactions: {
         Row: {
           amount: number
@@ -73,10 +234,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      select_best_host: {
+        Args: { preferred_location?: string; required_capabilities: string[] }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      compute_host_status: "online" | "offline" | "busy" | "maintenance"
+      execution_status:
+        | "pending"
+        | "running"
+        | "completed"
+        | "failed"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -203,6 +373,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      compute_host_status: ["online", "offline", "busy", "maintenance"],
+      execution_status: [
+        "pending",
+        "running",
+        "completed",
+        "failed",
+        "cancelled",
+      ],
+    },
   },
 } as const
