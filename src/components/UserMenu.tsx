@@ -1,15 +1,32 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wallet, Copy, Check, LogIn } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Wallet, Copy, Check, LogIn, ChevronDown, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User, Session } from "@supabase/supabase-js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const NETWORKS = [
+  { name: "Base", chainId: 8453, symbol: "⚡", color: "text-blue-500" },
+  { name: "Ethereum", chainId: 1, symbol: "Ξ", color: "text-purple-500" },
+  { name: "Arbitrum", chainId: 42161, symbol: "◆", color: "text-cyan-500" },
+  { name: "Optimism", chainId: 10, symbol: "🔴", color: "text-red-500" },
+  { name: "Polygon", chainId: 137, symbol: "⬡", color: "text-violet-500" },
+];
 
 export const UserMenu = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [walletAddress, setWalletAddress] = useState<string>("");
+  const [credits, setCredits] = useState<number>(0);
+  const [selectedNetwork, setSelectedNetwork] = useState(NETWORKS[0]);
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +43,7 @@ export const UserMenu = () => {
         if (session?.user) {
           setTimeout(() => {
             loadWalletAddress(session.user.id);
+            loadCredits(session.user.id);
           }, 0);
         }
       }
@@ -38,11 +56,24 @@ export const UserMenu = () => {
       
       if (session?.user) {
         loadWalletAddress(session.user.id);
+        loadCredits(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const loadCredits = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_credits")
+      .select("credits")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (data) {
+      setCredits(data.credits);
+    }
+  };
 
   const loadWalletAddress = async (userId: string) => {
     const { data, error } = await supabase
@@ -144,14 +175,52 @@ export const UserMenu = () => {
   if (user && walletAddress) {
     return (
       <div className="flex items-center gap-2">
+        <Badge variant="secondary" className="gap-1 px-3 py-1.5">
+          <Coins className="w-3 h-3" />
+          <span className="font-semibold">{credits}</span>
+        </Badge>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="gap-2 border-primary/30 bg-card/50"
+            >
+              <span className={`text-lg ${selectedNetwork.color}`}>
+                {selectedNetwork.symbol}
+              </span>
+              <span className="font-medium">{selectedNetwork.name}</span>
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-background z-50">
+            {NETWORKS.map((network) => (
+              <DropdownMenuItem
+                key={network.chainId}
+                onClick={() => setSelectedNetwork(network)}
+                className="cursor-pointer"
+              >
+                <span className={`text-lg mr-2 ${network.color}`}>
+                  {network.symbol}
+                </span>
+                <span>{network.name}</span>
+                {network.chainId === selectedNetwork.chainId && (
+                  <Check className="w-4 h-4 ml-auto" />
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <Button
           variant="outline"
           className="gap-2 border-primary/30 bg-card/50"
           onClick={copyAddress}
         >
-          <span className="font-mono">{shortenAddress(walletAddress)}</span>
-          {copied ? <Check className="w-4 h-4" /> : <Wallet className="w-4 h-4" />}
+          <span className="font-mono text-sm">{shortenAddress(walletAddress)}</span>
+          {copied ? <Check className="w-3 h-3" /> : <Wallet className="w-3 h-3" />}
         </Button>
+
         <Button variant="ghost" size="sm" onClick={handleLogout}>
           Logout
         </Button>
