@@ -4,14 +4,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Send, Loader2, Sparkles, MessageSquare, Image, Volume2, Wrench, Server, Coins } from "lucide-react";
 import { ChatMessage } from "@/components/ChatMessage";
-import { SettingsPanel } from "@/components/SettingsPanel";
-import { ToolsPanel } from "@/components/ToolsPanel";
 import { ImageGeneration } from "@/components/ImageGeneration";
 import { SpeechTools } from "@/components/SpeechTools";
 import { MCPServerPanel } from "@/components/MCPServerPanel";
 import { CreditsPanel } from "@/components/CreditsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 
 interface Message {
   role: "user" | "assistant";
@@ -102,38 +102,26 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4 px-6 py-3 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full border border-primary/30">
-            <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              Mod Chain
-            </h1>
-          </div>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Multi-modal AI platform with text, image, video, and speech generation plus MCP tools
-          </p>
-        </div>
+    <SidebarProvider>
+      <div className="min-h-screen w-full flex bg-gradient-to-br from-background via-background to-background/95">
+        <AppSidebar
+          model={model}
+          temperature={temperature}
+          maxTokens={maxTokens}
+          onModelChange={setModel}
+          onTemperatureChange={setTemperature}
+          onMaxTokensChange={setMaxTokens}
+          tools={tools}
+          onToolsChange={setTools}
+        />
+        
+        <div className="flex-1 flex flex-col">
+          <header className="h-12 flex items-center border-b border-border/50 bg-card/30 backdrop-blur-sm px-4">
+            <SidebarTrigger />
+          </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {/* Settings Sidebar */}
-          <div className="lg:col-span-1 space-y-4">
-            <SettingsPanel
-              model={model}
-              temperature={temperature}
-              maxTokens={maxTokens}
-              onModelChange={setModel}
-              onTemperatureChange={setTemperature}
-              onMaxTokensChange={setMaxTokens}
-            />
-            <ToolsPanel tools={tools} onToolsChange={setTools} />
-          </div>
-
-          {/* Main Content Area */}
-          <div className="lg:col-span-3">
-            <Tabs defaultValue="chat" className="w-full">
+          <main className="flex-1 container mx-auto px-4 py-6">
+            <Tabs defaultValue="chat" className="w-full h-full">
               <TabsList className="grid w-full grid-cols-6 mb-6">
                 <TabsTrigger value="chat">
                   <MessageSquare className="w-4 h-4 mr-2" />
@@ -252,10 +240,10 @@ const Index = () => {
                 <CreditsPanel />
               </TabsContent>
             </Tabs>
-          </div>
+          </main>
         </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
