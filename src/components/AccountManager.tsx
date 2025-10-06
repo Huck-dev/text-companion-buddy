@@ -21,6 +21,8 @@ interface SavedAccount {
   name: string;
   password: string;
   email: string;
+  walletAddress?: string;
+  solanaAddress?: string;
 }
 
 export const AccountManager = () => {
@@ -49,6 +51,16 @@ export const AccountManager = () => {
     if (user?.email) {
       setCurrentEmail(user.email);
     }
+  };
+
+  const fetchWalletAddresses = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("wallet_address, solana_address")
+      .eq("id", userId)
+      .maybeSingle();
+    
+    return data;
   };
 
   const saveAccounts = (accounts: SavedAccount[]) => {
@@ -97,10 +109,16 @@ export const AccountManager = () => {
         if (signUpError) throw signUpError;
       }
 
+      // Get wallet addresses
+      const { data: { user } } = await supabase.auth.getUser();
+      const walletData = user ? await fetchWalletAddresses(user.id) : null;
+
       const newAccount: SavedAccount = {
         name: newAccountName,
         password: newAccountPassword,
         email,
+        walletAddress: walletData?.wallet_address || "",
+        solanaAddress: walletData?.solana_address || "",
       };
 
       saveAccounts([...savedAccounts, newAccount]);
@@ -173,6 +191,11 @@ export const AccountManager = () => {
       .slice(0, 2);
   };
 
+  const shortenAddress = (address: string | undefined) => {
+    if (!address) return "Loading...";
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
   return (
     <div className="space-y-4">
       <Card className="bg-card/30 border-border/50">
@@ -200,9 +223,18 @@ export const AccountManager = () => {
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground font-mono truncate">
-                  {account.email}
-                </p>
+                <div className="space-y-0.5">
+                  {account.walletAddress && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      EVM: {shortenAddress(account.walletAddress)}
+                    </p>
+                  )}
+                  {account.solanaAddress && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      SOL: {shortenAddress(account.solanaAddress)}
+                    </p>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2">
                 {currentEmail !== account.email && (
