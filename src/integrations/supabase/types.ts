@@ -223,6 +223,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          updated_at?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
       servers: {
         Row: {
           app_url: string | null
@@ -262,6 +283,42 @@ export type Database = {
           server_type?: Database["public"]["Enums"]["server_type"]
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      token_deposits: {
+        Row: {
+          amount_usdc: number
+          created_at: string | null
+          credits_awarded: number
+          id: string
+          network: string | null
+          processed_at: string | null
+          transaction_hash: string
+          user_id: string | null
+          wallet_address: string
+        }
+        Insert: {
+          amount_usdc: number
+          created_at?: string | null
+          credits_awarded: number
+          id?: string
+          network?: string | null
+          processed_at?: string | null
+          transaction_hash: string
+          user_id?: string | null
+          wallet_address: string
+        }
+        Update: {
+          amount_usdc?: number
+          created_at?: string | null
+          credits_awarded?: number
+          id?: string
+          network?: string | null
+          processed_at?: string | null
+          transaction_hash?: string
+          user_id?: string | null
+          wallet_address?: string
         }
         Relationships: []
       }

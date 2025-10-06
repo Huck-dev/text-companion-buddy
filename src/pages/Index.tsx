@@ -4,13 +4,14 @@ import { Server, User, Cpu } from "lucide-react";
 import { ServersPanel } from "@/components/ServersPanel";
 import { CreditsPanel } from "@/components/CreditsPanel";
 import { ComputePanel } from "@/components/ComputePanel";
+import { UserMenu } from "@/components/UserMenu";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("compute");
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-background/95">
-      <header className="h-16 flex items-center border-b border-border/50 bg-card/30 backdrop-blur-sm px-4">
+      <header className="h-16 flex items-center justify-between border-b border-border/50 bg-card/30 backdrop-blur-sm px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
           <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="compute">
@@ -27,6 +28,8 @@ const Index = () => {
             </TabsTrigger>
           </TabsList>
         </Tabs>
+        
+        <UserMenu />
       </header>
 
       <main className="container mx-auto px-4 py-6">
