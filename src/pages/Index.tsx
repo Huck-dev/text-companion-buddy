@@ -1,15 +1,12 @@
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Server, User, X } from "lucide-react";
+import { Server, X } from "lucide-react";
 import { UnifiedServersPanel } from "@/components/UnifiedServersPanel";
-import { CreditsPanel } from "@/components/CreditsPanel";
 import { UserMenu } from "@/components/UserMenu";
 import { ChatInterface } from "@/components/ChatInterface";
 import { Button } from "@/components/ui/button";
 import { LogoCube } from "@/components/LogoCube";
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState("infrastructure");
   const [selectedNetwork, setSelectedNetwork] = useState<{ name: string; chainId: number; type: string } | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [addresses, setAddresses] = useState<{ evm: string; solana: string }>({ evm: "", solana: "" });
@@ -50,18 +47,12 @@ const Index = () => {
             <div onClick={() => setIsChatOpen(!isChatOpen)} className="cursor-pointer">
               <LogoCube />
             </div>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-              <TabsList className="grid w-full max-w-md grid-cols-2 bg-secondary/50 backdrop-blur-sm">
-                <TabsTrigger value="infrastructure" className="data-[state=active]:bg-primary/20">
-                  <Server className="w-4 h-4 mr-2" />
-                  Infrastructure
-                </TabsTrigger>
-                <TabsTrigger value="account" className="data-[state=active]:bg-primary/20">
-                  <User className="w-4 h-4 mr-2" />
-                  Account
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="flex items-center gap-2">
+              <Server className="w-5 h-5 text-primary" />
+              <h1 className="text-xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Servers
+              </h1>
+            </div>
           </div>
           
           <div className="flex items-center gap-4 relative z-10">
@@ -70,15 +61,7 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-6 py-8">
-          <Tabs value={activeTab} className="w-full">
-            <TabsContent value="infrastructure" className="space-y-4 animate-fade-in">
-              <UnifiedServersPanel />
-            </TabsContent>
-
-            <TabsContent value="account" className="space-y-4 animate-fade-in">
-              <CreditsPanel selectedNetwork={selectedNetwork} addresses={addresses} />
-            </TabsContent>
-          </Tabs>
+          <UnifiedServersPanel />
         </main>
       </div>
     </div>
