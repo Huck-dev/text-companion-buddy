@@ -148,14 +148,6 @@ export const ComputePanel = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Distributed Compute Network
-          </h2>
-          <p className="text-muted-foreground">
-            Manage compute hosts and execute MCP functions with profit sharing
-          </p>
-        </div>
         <Button onClick={() => setShowAddHost(true)} className="gap-2">
           <Plus className="w-4 h-4" />
           Add Host

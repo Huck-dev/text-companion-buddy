@@ -184,14 +184,6 @@ export const ServersPanel = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Servers
-          </h2>
-          <p className="text-muted-foreground">
-            Manage your MCP, A2A, and custom servers
-          </p>
-        </div>
         <Button onClick={() => setShowAddServer(true)} className="gap-2">
           <Plus className="w-4 h-4" />
           Add Server
