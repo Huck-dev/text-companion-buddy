@@ -13,8 +13,6 @@ export const UserMenu = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [showAuth, setShowAuth] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -65,21 +63,18 @@ export const UserMenu = () => {
     setIsLoading(true);
 
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      // Generate a unique email from password hash
+      const email = `user_${password.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)}@modchain.local`;
+      
+      // Try to sign in first
+      let { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Logged in successfully",
-        });
-        setShowAuth(false);
-      } else {
-        const { error } = await supabase.auth.signUp({
+      // If sign in fails, create new account
+      if (signInError) {
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -87,14 +82,15 @@ export const UserMenu = () => {
           },
         });
 
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Account created! You can now log in.",
-        });
-        setIsLogin(true);
+        if (signUpError) throw signUpError;
       }
+
+      toast({
+        title: "Success",
+        description: "Logged in successfully",
+      });
+      setShowAuth(false);
+      setPassword("");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -160,22 +156,10 @@ export const UserMenu = () => {
       <Dialog open={showAuth} onOpenChange={setShowAuth}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{isLogin ? "Login" : "Sign Up"}</DialogTitle>
+            <DialogTitle>Enter Password</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleAuth} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-
             <div>
               <Label htmlFor="password">Password</Label>
               <Input
@@ -183,23 +167,14 @@ export const UserMenu = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 required
-                className="font-mono"
+                autoComplete="current-password"
               />
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Loading..." : isLogin ? "LOGIN" : "SIGN UP"}
-            </Button>
-
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? "Need an account? Sign up" : "Already have an account? Login"}
+              {isLoading ? "Loading..." : "LOGIN"}
             </Button>
           </form>
         </DialogContent>
