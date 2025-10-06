@@ -247,6 +247,29 @@ export const UnifiedServersPanel = () => {
     }
   };
 
+  const toggleServerPublish = async (serverId: string, isPublic: boolean) => {
+    const { error } = await supabase
+      .from("servers")
+      .update({ is_public: isPublic })
+      .eq("id", serverId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: isPublic ? "Published" : "Unpublished",
+      description: `Server is now ${isPublic ? 'public' : 'private'}`,
+    });
+
+    loadItems();
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "online":
@@ -559,23 +582,35 @@ export const UnifiedServersPanel = () => {
                           <p className="text-sm text-muted-foreground">{item.description}</p>
                         )}
                       </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => executeServer(item.id)}
-                          className="gap-2"
-                        >
-                          <Play className="w-4 h-4" />
-                          Execute
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => setSelectedServer(selectedServer?.id === item.id ? null : item)}
-                        >
-                          <Code className="w-4 h-4" />
-                        </Button>
+                      <div className="flex flex-col gap-3 items-end">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`publish-${item.id}`} className="text-xs text-muted-foreground">
+                            {item.is_public ? 'Published' : 'Publish'}
+                          </Label>
+                          <Switch
+                            id={`publish-${item.id}`}
+                            checked={item.is_public}
+                            onCheckedChange={(checked) => toggleServerPublish(item.id, checked)}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => executeServer(item.id)}
+                            className="gap-2"
+                          >
+                            <Play className="w-4 h-4" />
+                            Execute
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setSelectedServer(selectedServer?.id === item.id ? null : item)}
+                          >
+                            <Code className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
 

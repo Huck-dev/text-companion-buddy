@@ -223,6 +223,30 @@ export type Database = {
         }
         Relationships: []
       }
+      friends: {
+        Row: {
+          created_at: string
+          friend_name: string
+          friend_user_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_name: string
+          friend_user_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_name?: string
+          friend_user_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

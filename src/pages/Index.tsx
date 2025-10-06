@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Server, User, X } from "lucide-react";
+import { Server, User } from "lucide-react";
 import { UnifiedServersPanel } from "@/components/UnifiedServersPanel";
 import { UserMenu } from "@/components/UserMenu";
 import { CreditsPanel } from "@/components/CreditsPanel";
 import { AccountsListPanel } from "@/components/AccountsListPanel";
 import { AccountManager } from "@/components/AccountManager";
+import { FriendsPanel } from "@/components/FriendsPanel";
 import { Button } from "@/components/ui/button";
 import { LogoCube } from "@/components/LogoCube";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -59,10 +60,11 @@ const Index = () => {
           </SheetHeader>
           
           <Tabs defaultValue="account" className="mt-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="account">My Account</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="account">Account</TabsTrigger>
               <TabsTrigger value="manage">Manage</TabsTrigger>
-              <TabsTrigger value="accounts">All Users</TabsTrigger>
+              <TabsTrigger value="friends">Friends</TabsTrigger>
+              <TabsTrigger value="users">Users</TabsTrigger>
             </TabsList>
             
             <TabsContent value="account" className="mt-4">
@@ -73,7 +75,11 @@ const Index = () => {
               <AccountManager />
             </TabsContent>
             
-            <TabsContent value="accounts" className="mt-4">
+            <TabsContent value="friends" className="mt-4">
+              <FriendsPanel />
+            </TabsContent>
+            
+            <TabsContent value="users" className="mt-4">
               <AccountsListPanel />
             </TabsContent>
           </Tabs>
