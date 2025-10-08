@@ -28,7 +28,7 @@ const NETWORKS = [
   { name: "Solana", chainId: 0, logo: solanaLogo, type: "solana" },
 ];
 
-export const UserMenu = ({ onNetworkChange, onAddressesChange }: { onNetworkChange: (network: typeof NETWORKS[0]) => void; onAddressesChange?: (evm: string, solana: string) => void }) => {
+export const UserMenu = ({ onNetworkChange, onAddressesChange, onAccountClick }: { onNetworkChange: (network: typeof NETWORKS[0]) => void; onAddressesChange?: (evm: string, solana: string) => void; onAccountClick?: () => void }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [evmAddress, setEvmAddress] = useState<string>("");
@@ -39,6 +39,7 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange }: { onNetworkChan
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
   const { toast } = useToast();
 
   const walletAddress = selectedNetwork.type === "solana" ? solanaAddress : evmAddress;
@@ -266,44 +267,41 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange }: { onNetworkChan
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="gap-2 border-primary/30 bg-card/50 min-w-[180px]"
+        <div className="relative">
+          <Button
+            variant="outline"
+            className="gap-2 border-primary/30 bg-card/50 min-w-[180px]"
+            onMouseEnter={() => setShowLogout(true)}
+            onMouseLeave={() => setShowLogout(false)}
+            onClick={() => {
+              onAccountClick?.();
+              copyAddress();
+            }}
+          >
+            <div className="flex-1 flex flex-col items-start">
+              <span className="font-mono text-xs">{shortenAddress(walletAddress)}</span>
+              <span className="text-xs text-muted-foreground">USDC {selectedNetwork.type === "evm" ? "(ERC-20)" : "(SPL)"}</span>
+            </div>
+            <Copy className="w-4 h-4 ml-2" />
+          </Button>
+          
+          {showLogout && (
+            <div 
+              className="absolute top-full right-0 mt-1 z-50"
+              onMouseEnter={() => setShowLogout(true)}
+              onMouseLeave={() => setShowLogout(false)}
             >
-              <div className="flex-1 flex flex-col items-start">
-                <span className="font-mono text-xs">{shortenAddress(walletAddress)}</span>
-                <span className="text-xs text-muted-foreground">USDC {selectedNetwork.type === "evm" ? "(ERC-20)" : "(SPL)"}</span>
-              </div>
-              <Copy className="w-4 h-4 ml-2" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-background z-50 w-64">
-            <div className="p-3 space-y-2">
-              <div className="text-xs text-muted-foreground">Full Address</div>
-              <div className="font-mono text-xs break-all">{walletAddress}</div>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="w-full mt-2"
-                onClick={copyAddress}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout}
+                className="border-border/50 bg-background shadow-lg"
               >
-                {copied ? <Check className="w-3 h-3 mr-2" /> : <Copy className="w-3 h-3 mr-2" />}
-                {copied ? "Copied!" : "Copy Address"}
+                Logout
               </Button>
             </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleLogout}
-          className="border-border/50"
-        >
-          Logout
-        </Button>
+          )}
+        </div>
       </div>
     );
   }

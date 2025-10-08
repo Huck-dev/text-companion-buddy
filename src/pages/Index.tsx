@@ -41,7 +41,7 @@ const Index = () => {
             >
               <User className="w-5 h-5" />
             </Button>
-            <UserMenu onNetworkChange={setSelectedNetwork} onAddressesChange={(evm, sol) => setAddresses({ evm, solana: sol })} />
+            <UserMenu onNetworkChange={setSelectedNetwork} onAddressesChange={(evm, sol) => setAddresses({ evm, solana: sol })} onAccountClick={() => setIsAccountOpen(true)} />
           </div>
         </header>
 
