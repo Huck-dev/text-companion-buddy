@@ -33,14 +33,6 @@ const Index = () => {
           </div>
           
           <div className="flex items-center gap-4 relative z-10">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setIsAccountOpen(true)}
-              className="border-primary/30 bg-card/50 hover:bg-primary/10"
-            >
-              <User className="w-5 h-5" />
-            </Button>
             <UserMenu onNetworkChange={setSelectedNetwork} onAddressesChange={(evm, sol) => setAddresses({ evm, solana: sol })} onAccountClick={() => setIsAccountOpen(true)} />
           </div>
         </header>
