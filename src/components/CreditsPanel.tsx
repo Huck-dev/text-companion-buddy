@@ -179,9 +179,30 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
         <CardContent>
           {walletAddress ? (
             <div className="space-y-3">
-              <div className="bg-secondary/20 rounded-lg p-3 space-y-2">
-                <p className="text-xs text-muted-foreground">Your Deposit Address:</p>
-                <p className="font-mono text-sm break-all">{walletAddress}</p>
+              <div className="bg-secondary/20 rounded-lg p-4 space-y-3 border border-border/50">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-muted-foreground">Network</p>
+                      <Badge variant={selectedNetwork ? "default" : "secondary"} className="text-xs">
+                        {selectedNetwork?.name || "Select Network"}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">Token</p>
+                      <p className="text-xs">USDC {selectedNetwork?.type === "evm" ? "(ERC-20)" : "(SPL)"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">Deposit Address</p>
+                      <p className="font-mono text-xs break-all text-foreground/90">{walletAddress}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Rate:</strong> 1 USDC = 10 Credits
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 <Button
                   variant="outline"
                   size="sm"
@@ -194,25 +215,18 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
                   Copy Address
                 </Button>
               </div>
-              <div className="space-y-2">
-                <div className="text-xs text-muted-foreground">
-                  <p className="font-semibold mb-2">Supported Networks:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {SUPPORTED_NETWORKS.map((network) => (
-                      <Badge 
-                        key={network.name}
-                        variant={network.active ? "default" : "secondary"}
-                        className="text-xs"
-                      >
-                        {network.name} {network.active && "✓"}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <div className="text-xs space-y-1 text-muted-foreground pt-2">
-                  <p><strong>Token:</strong> USDC {selectedNetwork?.type === "evm" ? "(ERC-20)" : "(SPL)"}</p>
-                  <p><strong>Rate:</strong> 1 USDC = 10 Credits</p>
-                  <p><strong>Network:</strong> {selectedNetwork?.name || "Please select a network"}</p>
+              <div className="text-xs text-muted-foreground">
+                <p className="font-semibold mb-2">Supported Networks:</p>
+                <div className="flex flex-wrap gap-2">
+                  {SUPPORTED_NETWORKS.map((network) => (
+                    <Badge 
+                      key={network.name}
+                      variant={network.active ? "default" : "secondary"}
+                      className="text-xs"
+                    >
+                      {network.name} {network.active && "✓"}
+                    </Badge>
+                  ))}
                 </div>
               </div>
               <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 text-xs">
