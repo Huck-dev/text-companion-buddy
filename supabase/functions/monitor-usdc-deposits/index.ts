@@ -6,11 +6,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// USDC contract address on Base mainnet
-const USDC_CONTRACT = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-const USDC_DECIMALS = 6;
+// USDC contract addresses
+const USDC_CONTRACTS = {
+  base: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  solana: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC on Solana
+};
 
-// Credits per USDC: 1 USDC = 10 credits
+const USDC_DECIMALS = 6;
 const CREDITS_PER_USDC = 10;
 
 serve(async (req) => {
@@ -24,41 +26,48 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { wallet_address } = await req.json();
+    const { wallet_address, network = "base" } = await req.json();
 
     if (!wallet_address) {
       throw new Error("Wallet address is required");
     }
 
-    console.log("Checking deposits for wallet:", wallet_address);
+    console.log(`Checking deposits for wallet: ${wallet_address} on ${network}`);
 
-    // Find user by wallet address
+    // Find user by wallet address (EVM or Solana)
+    const isEVM = network.toLowerCase() === "base";
     const { data: profile, error: profileError } = await supabaseClient
       .from("profiles")
       .select("id")
-      .eq("wallet_address", wallet_address)
+      .or(isEVM ? `wallet_address.eq.${wallet_address}` : `solana_address.eq.${wallet_address}`)
       .single();
 
     if (profileError || !profile) {
       throw new Error("User not found for this wallet address");
     }
 
-    // Here you would integrate with Base network RPC to check for USDC transfers
-    // For now, we'll return a structure for manual deposit processing
-    // In production, you'd use ethers.js or web3.js to query the blockchain
+    // In production, integrate with blockchain RPCs:
+    // - Base: Use ethers.js/web3.js to query USDC transfers
+    // - Solana: Use @solana/web3.js to query SPL token transfers
+    
+    // For now, return deposit instructions
+    const contract = network.toLowerCase() === "solana" 
+      ? USDC_CONTRACTS.solana 
+      : USDC_CONTRACTS.base;
 
-    // Example response structure:
     const response = {
       wallet_address,
       user_id: profile.id,
+      network: network.charAt(0).toUpperCase() + network.slice(1),
       instructions: {
-        network: "Base",
+        network: network.charAt(0).toUpperCase() + network.slice(1),
         token: "USDC",
-        contract: USDC_CONTRACT,
+        contract,
         deposit_address: wallet_address,
         rate: `1 USDC = ${CREDITS_PER_USDC} credits`,
+        type: network.toLowerCase() === "solana" ? "SPL Token" : "ERC-20",
       },
-      message: "Send USDC to your wallet address to automatically receive credits",
+      message: `Send USDC to your ${network} wallet address to automatically receive credits`,
     };
 
     return new Response(JSON.stringify(response), {

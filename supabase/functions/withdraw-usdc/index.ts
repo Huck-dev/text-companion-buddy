@@ -34,11 +34,18 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    const { amount_usdc, recipient_address, network } = await req.json();
+    const { amount_usdc, recipient_address, network = "Base" } = await req.json();
 
-    if (!amount_usdc || !recipient_address) {
-      throw new Error("Amount and recipient address are required");
+    if (!amount_usdc || !recipient_address || !network) {
+      throw new Error("Amount, recipient address, and network are required");
     }
+
+    // Validate network
+    if (!["Base", "Solana"].includes(network)) {
+      throw new Error("Only Base and Solana networks are supported");
+    }
+
+    console.log(`Withdrawal request: ${amount_usdc} USDC to ${recipient_address} on ${network}`);
 
     const creditsNeeded = Math.ceil(amount_usdc * CREDITS_PER_USDC);
 
@@ -77,10 +84,10 @@ serve(async (req) => {
         description: `Withdrew ${amount_usdc} USDC to ${recipient_address} on ${network}`,
       });
 
-    // TODO: In production, integrate with actual blockchain to send USDC
-    // For now, we just create a withdrawal record
-    console.log(`Withdrawal request: ${amount_usdc} USDC to ${recipient_address} on ${network}`);
-
+    // TODO: In production, integrate with blockchain:
+    // - Base: Use ethers.js to send USDC via ERC-20 transfer
+    // - Solana: Use @solana/web3.js to send USDC via SPL token transfer
+    
     return new Response(
       JSON.stringify({
         success: true,
@@ -88,7 +95,7 @@ serve(async (req) => {
         credits_deducted: creditsNeeded,
         recipient_address,
         network,
-        message: "Withdrawal request submitted. USDC will be sent within 24 hours.",
+        message: `Withdrawal request submitted. ${amount_usdc} USDC will be sent to ${recipient_address} on ${network} within 24 hours.`,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

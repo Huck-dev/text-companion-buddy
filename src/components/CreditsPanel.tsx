@@ -37,13 +37,10 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
 
   const walletAddress = selectedNetwork?.type === "solana" ? addresses.solana : addresses.evm;
 
-  // Update USDC_NETWORKS based on selected network - only EVM networks support USDC deposits
-  const USDC_NETWORKS = [
-    { name: "Base", chainId: 8453, active: selectedNetwork?.name === "Base" },
-    { name: "Ethereum", chainId: 1, active: selectedNetwork?.name === "Ethereum" },
-    { name: "Arbitrum", chainId: 42161, active: selectedNetwork?.name === "Arbitrum" },
-    { name: "Optimism", chainId: 10, active: selectedNetwork?.name === "Optimism" },
-    { name: "Polygon", chainId: 137, active: selectedNetwork?.name === "Polygon" },
+  // Supported networks: Base and Solana only
+  const SUPPORTED_NETWORKS = [
+    { name: "Base", chainId: 8453, type: "evm", active: selectedNetwork?.name === "Base" },
+    { name: "Solana", chainId: null, type: "solana", active: selectedNetwork?.name === "Solana" },
   ];
 
   useEffect(() => {
@@ -176,9 +173,7 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
             Fund Credits with USDC
           </CardTitle>
           <CardDescription className="text-xs">
-            {selectedNetwork?.type === "solana" 
-              ? "Solana USDC deposits coming soon" 
-              : "Send USDC on supported EVM networks to your wallet"}
+            Send USDC on Base or Solana to fund your account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -200,33 +195,25 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
                 </Button>
               </div>
               <div className="space-y-2">
-                {selectedNetwork?.type === "evm" ? (
-                  <>
-                    <div className="text-xs text-muted-foreground">
-                      <p className="font-semibold mb-2">Supported Networks:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {USDC_NETWORKS.map((network) => (
-                          <Badge 
-                            key={network.chainId}
-                            variant={network.active ? "default" : "secondary"}
-                            className="text-xs"
-                          >
-                            {network.name} {network.active && "✓"}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="text-xs space-y-1 text-muted-foreground pt-2">
-                      <p><strong>Token:</strong> USDC (ERC-20)</p>
-                      <p><strong>Rate:</strong> 1 USDC = 10 Credits</p>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-xs text-muted-foreground bg-muted/30 rounded p-3">
-                    <p className="font-semibold mb-1">Solana Support Coming Soon</p>
-                    <p>USDC deposits on Solana will be available in a future update. For now, please use an EVM network.</p>
+                <div className="text-xs text-muted-foreground">
+                  <p className="font-semibold mb-2">Supported Networks:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {SUPPORTED_NETWORKS.map((network) => (
+                      <Badge 
+                        key={network.name}
+                        variant={network.active ? "default" : "secondary"}
+                        className="text-xs"
+                      >
+                        {network.name} {network.active && "✓"}
+                      </Badge>
+                    ))}
                   </div>
-                )}
+                </div>
+                <div className="text-xs space-y-1 text-muted-foreground pt-2">
+                  <p><strong>Token:</strong> USDC {selectedNetwork?.type === "evm" ? "(ERC-20)" : "(SPL)"}</p>
+                  <p><strong>Rate:</strong> 1 USDC = 10 Credits</p>
+                  <p><strong>Network:</strong> {selectedNetwork?.name || "Please select a network"}</p>
+                </div>
               </div>
               <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 text-xs">
                 Credits are automatically added when USDC is received
@@ -287,7 +274,7 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
         </CardContent>
       </Card>
 
-      {deposits.length > 0 && selectedNetwork?.type === "evm" && (
+      {deposits.length > 0 && (selectedNetwork?.name === "Base" || selectedNetwork?.name === "Solana") && (
         <Card className="bg-card/30 border-border/50">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -295,7 +282,7 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
               Withdraw USDC
             </CardTitle>
             <CardDescription className="text-xs">
-              Convert credits back to USDC (1 USDC = 10 credits)
+              Convert credits back to USDC on {selectedNetwork?.name} (1 USDC = 10 credits)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -321,7 +308,7 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
                 <Label htmlFor="withdraw-address" className="text-xs">Recipient Address</Label>
                 <Input
                   id="withdraw-address"
-                  placeholder="0x..."
+                  placeholder={selectedNetwork?.type === "solana" ? "Solana address..." : "0x..."}
                   value={withdrawAddress}
                   onChange={(e) => setWithdrawAddress(e.target.value)}
                   className="mt-1 font-mono text-sm"
