@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Wallet, Copy, Check, LogIn, ChevronDown, Coins } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { User, Session } from "@supabase/supabase-js";
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useWalletConnection } from "@/hooks/useWalletConnection";
 import baseLogo from "@/assets/base-logo.jpg";
 import ethereumLogo from "@/assets/ethereum-logo.jpg";
 import arbitrumLogo from "@/assets/arbitrum-logo.jpg";
@@ -31,8 +32,6 @@ const NETWORKS = [
 export const UserMenu = ({ onNetworkChange, onAddressesChange, onAccountClick }: { onNetworkChange: (network: typeof NETWORKS[0]) => void; onAddressesChange?: (evm: string, solana: string) => void; onAccountClick?: () => void }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [evmAddress, setEvmAddress] = useState<string>("");
-  const [solanaAddress, setSolanaAddress] = useState<string>("");
   const [credits, setCredits] = useState<number>(0);
   const [selectedNetwork, setSelectedNetwork] = useState(NETWORKS[0]);
   const [showPasswordInput, setShowPasswordInput] = useState(false);
@@ -40,13 +39,32 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange, onAccountClick }:
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
-  const { toast } = useToast();
+  
+  const {
+    evmAddress,
+    solanaAddress,
+    connectedWallet,
+    isConnecting,
+    connectMetaMask,
+    connectPhantom,
+    connectSubWallet,
+  } = useWalletConnection();
 
   const walletAddress = selectedNetwork.type === "solana" ? solanaAddress : evmAddress;
 
   useEffect(() => {
     onNetworkChange(selectedNetwork);
   }, [selectedNetwork, onNetworkChange]);
+
+  useEffect(() => {
+    if (evmAddress || solanaAddress) {
+      onAddressesChange?.(evmAddress, solanaAddress);
+      // Save connected addresses to profile
+      if (user) {
+        saveWalletAddresses(user.id, evmAddress, solanaAddress);
+      }
+    }
+  }, [evmAddress, solanaAddress, user]);
 
   useEffect(() => {
     // Set up auth state listener
@@ -102,51 +120,23 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange, onAccountClick }:
       return;
     }
 
-    if (data?.wallet_address) {
-      setEvmAddress(data.wallet_address);
-      onAddressesChange?.(data.wallet_address, solanaAddress || "");
-    } else {
-      // Create EVM address if it doesn't exist
-      const newEvmAddress = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(20)))
-        .map(b => b.toString(16).padStart(2, '0')).join('');
-      
-      const { error: insertError } = await supabase
-        .from("profiles")
-        .update({ wallet_address: newEvmAddress })
-        .eq("id", userId);
-      
-      if (!insertError) {
-        setEvmAddress(newEvmAddress);
-        onAddressesChange?.(newEvmAddress, solanaAddress || "");
-      }
+    // Load saved addresses but don't auto-generate
+    if (data?.wallet_address || data?.solana_address) {
+      onAddressesChange?.(data.wallet_address || "", data.solana_address || "");
     }
+  };
 
-    // @ts-ignore - solana_address column exists but types not updated yet
-    if (data?.solana_address) {
-      // @ts-ignore
-      setSolanaAddress(data.solana_address);
-      onAddressesChange?.(evmAddress || "", data.solana_address);
-    } else {
-      // Create Solana address if it doesn't exist (simplified base58-like format)
-      const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-      const newSolanaAddress = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-        .map(b => chars[b % chars.length])
-        .join('');
-      
-      // @ts-ignore - solana_address column exists but types not updated yet
-      const { error: insertError } = await supabase
-        .from("profiles")
-        .update({ solana_address: newSolanaAddress })
-        .eq("id", userId);
-      
-      if (!insertError) {
-        setSolanaAddress(newSolanaAddress);
-        onAddressesChange?.(evmAddress || "", newSolanaAddress);
-        toast({
-          title: "Success",
-          description: "Solana address generated!",
-        });
-      }
+  const saveWalletAddresses = async (userId: string, evm: string, solana: string) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ 
+        wallet_address: evm || null,
+        solana_address: solana || null
+      })
+      .eq("id", userId);
+
+    if (error) {
+      console.error("Error saving wallet addresses:", error);
     }
   };
 
@@ -177,18 +167,11 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange, onAccountClick }:
         if (signUpError) throw signUpError;
       }
 
-      toast({
-        title: "Success",
-        description: "Logged in successfully",
-      });
+      toast("Logged in successfully");
       setShowPasswordInput(false);
       setPassword("");
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -196,22 +179,27 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange, onAccountClick }:
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setEvmAddress("");
-    setSolanaAddress("");
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully",
-    });
+    toast("Logged out successfully");
   };
 
   const copyAddress = () => {
     navigator.clipboard.writeText(walletAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast({
-      title: "Copied",
-      description: "Wallet address copied to clipboard",
-    });
+    toast("Address copied to clipboard");
+  };
+
+  const handleConnectWallet = async () => {
+    if (!user) {
+      toast.error("Please sign in first");
+      return;
+    }
+
+    if (selectedNetwork.type === "solana") {
+      await connectPhantom();
+    } else {
+      await connectMetaMask();
+    }
   };
 
   const shortenAddress = (address: string) => {
@@ -219,7 +207,10 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange, onAccountClick }:
     return `${address.slice(0, 6)}…${address.slice(-4)}`;
   };
 
-  if (user && walletAddress) {
+  if (user) {
+    const address = walletAddress || "";
+    const hasWallet = !!address;
+
     return (
       <div className="flex items-center gap-2">
         <Button
@@ -267,41 +258,55 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange, onAccountClick }:
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="relative">
-          <Button
-            variant="outline"
-            className="gap-2 border-primary/30 bg-card/50 min-w-[180px]"
-            onMouseEnter={() => setShowLogout(true)}
-            onMouseLeave={() => setShowLogout(false)}
-            onClick={() => {
-              onAccountClick?.();
-              copyAddress();
-            }}
-          >
-            <div className="flex-1 flex flex-col items-start">
-              <span className="font-mono text-xs">{shortenAddress(walletAddress)}</span>
-              <span className="text-xs text-muted-foreground">USDC {selectedNetwork.type === "evm" ? "(ERC-20)" : "(SPL)"}</span>
-            </div>
-            <Copy className="w-4 h-4 ml-2" />
-          </Button>
-          
-          {showLogout && (
-            <div 
-              className="absolute top-full right-0 mt-1 z-50"
+        {hasWallet ? (
+          <div className="relative">
+            <Button
+              variant="outline"
+              className="gap-2 border-primary/30 bg-card/50 min-w-[180px]"
               onMouseEnter={() => setShowLogout(true)}
               onMouseLeave={() => setShowLogout(false)}
+              onClick={() => {
+                onAccountClick?.();
+                copyAddress();
+              }}
             >
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleLogout}
-                className="border-border/50 bg-background shadow-lg"
+              <div className="flex-1 flex flex-col items-start">
+                <span className="font-mono text-xs">{shortenAddress(address)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {connectedWallet ? `${connectedWallet} connected` : "USDC"}
+                </span>
+              </div>
+              <Copy className="w-4 h-4 ml-2" />
+            </Button>
+            
+            {showLogout && (
+              <div 
+                className="absolute top-full right-0 mt-1 z-50"
+                onMouseEnter={() => setShowLogout(true)}
+                onMouseLeave={() => setShowLogout(false)}
               >
-                Logout
-              </Button>
-            </div>
-          )}
-        </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleLogout}
+                  className="border-border/50 bg-background shadow-lg"
+                >
+                  Logout
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            className="gap-2 border-primary/30 bg-card/50"
+            onClick={handleConnectWallet}
+            disabled={isConnecting}
+          >
+            <Wallet className="w-4 h-4" />
+            {isConnecting ? "Connecting..." : "Connect Wallet"}
+          </Button>
+        )}
       </div>
     );
   }
