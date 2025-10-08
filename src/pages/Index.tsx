@@ -4,6 +4,7 @@ import { UnifiedServersPanel } from "@/components/UnifiedServersPanel";
 import { UserMenu } from "@/components/UserMenu";
 import { CreditsPanel } from "@/components/CreditsPanel";
 import { FriendsPanel } from "@/components/FriendsPanel";
+import { ExecutionsPanel } from "@/components/ExecutionsPanel";
 import { LogoCube } from "@/components/LogoCube";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,13 +44,18 @@ const Index = () => {
       <Sheet open={isAccountOpen} onOpenChange={setIsAccountOpen}>
         <SheetContent side="right" className="w-[500px] sm:max-w-[500px] overflow-y-auto">
           <Tabs defaultValue="account" className="mt-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="account">Account</TabsTrigger>
+              <TabsTrigger value="executions">Executions</TabsTrigger>
               <TabsTrigger value="friends">Friends</TabsTrigger>
             </TabsList>
             
             <TabsContent value="account" className="mt-4">
               <CreditsPanel selectedNetwork={selectedNetwork} addresses={addresses} />
+            </TabsContent>
+            
+            <TabsContent value="executions" className="mt-4">
+              <ExecutionsPanel />
             </TabsContent>
             
             <TabsContent value="friends" className="mt-4">
