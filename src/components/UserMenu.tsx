@@ -221,10 +221,14 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange }: { onNetworkChan
   if (user && walletAddress) {
     return (
       <div className="flex items-center gap-2">
-        <Badge variant="secondary" className="gap-1 px-3 py-1.5">
-          <Coins className="w-3 h-3" />
-          <span className="font-semibold">{credits}</span>
-        </Badge>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 border-primary/30 bg-card/50 px-3 py-1.5 h-auto"
+        >
+          <Coins className="w-4 h-4" />
+          <span className="font-semibold">${(credits / 10).toFixed(2)}</span>
+        </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -262,16 +266,42 @@ export const UserMenu = ({ onNetworkChange, onAddressesChange }: { onNetworkChan
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button
-          variant="outline"
-          className="gap-2 border-primary/30 bg-card/50"
-          onClick={copyAddress}
-        >
-          <span className="font-mono text-sm">{shortenAddress(walletAddress)}</span>
-          {copied ? <Check className="w-3 h-3" /> : <Wallet className="w-3 h-3" />}
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="gap-2 border-primary/30 bg-card/50 min-w-[180px]"
+            >
+              <div className="flex-1 flex flex-col items-start">
+                <span className="font-mono text-xs">{shortenAddress(walletAddress)}</span>
+                <span className="text-xs text-muted-foreground">USDC {selectedNetwork.type === "evm" ? "(ERC-20)" : "(SPL)"}</span>
+              </div>
+              <Copy className="w-4 h-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-background z-50 w-64">
+            <div className="p-3 space-y-2">
+              <div className="text-xs text-muted-foreground">Full Address</div>
+              <div className="font-mono text-xs break-all">{walletAddress}</div>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="w-full mt-2"
+                onClick={copyAddress}
+              >
+                {copied ? <Check className="w-3 h-3 mr-2" /> : <Copy className="w-3 h-3 mr-2" />}
+                {copied ? "Copied!" : "Copy Address"}
+              </Button>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        <Button variant="ghost" size="sm" onClick={handleLogout}>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleLogout}
+          className="border-border/50"
+        >
           Logout
         </Button>
       </div>
