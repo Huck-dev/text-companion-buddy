@@ -152,6 +152,8 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
     }
   };
 
+  const usdBalance = (credits / 10).toFixed(2);
+
   return (
     <div className="space-y-4">
       <Card className="bg-card/30 border-border/50">
@@ -162,7 +164,8 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{credits}</div>
+          <div className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">${usdBalance}</div>
+          <p className="text-xs text-muted-foreground mt-1">{credits} credits</p>
         </CardContent>
       </Card>
 
@@ -180,40 +183,37 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
           {walletAddress ? (
             <div className="space-y-3">
               <div className="bg-secondary/20 rounded-lg p-4 space-y-3 border border-border/50">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-muted-foreground">Network</p>
-                      <Badge variant={selectedNetwork ? "default" : "secondary"} className="text-xs">
-                        {selectedNetwork?.name || "Select Network"}
-                      </Badge>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">Your Deposit Address</p>
+                    <p className="font-mono text-sm break-all text-foreground">{walletAddress}</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      navigator.clipboard.writeText(walletAddress);
+                      toast.success("Address copied!");
+                    }}
+                  >
+                    Copy Address
+                  </Button>
+                  <div className="pt-2 space-y-2 text-xs text-muted-foreground">
+                    <div className="flex justify-between">
+                      <span>Network:</span>
+                      <span className="font-medium">{selectedNetwork?.name || "Select Network"}</span>
                     </div>
-                    <div>
-                      <p className="text-xs font-semibold text-muted-foreground mb-1">Token</p>
-                      <p className="text-xs">USDC {selectedNetwork?.type === "evm" ? "(ERC-20)" : "(SPL)"}</p>
+                    <div className="flex justify-between">
+                      <span>Token:</span>
+                      <span className="font-medium">USDC {selectedNetwork?.type === "evm" ? "(ERC-20)" : "(SPL)"}</span>
                     </div>
-                    <div>
-                      <p className="text-xs font-semibold text-muted-foreground mb-1">Deposit Address</p>
-                      <p className="font-mono text-xs break-all text-foreground/90">{walletAddress}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">
-                        <strong>Rate:</strong> 1 USDC = 10 Credits
-                      </p>
+                    <div className="flex justify-between">
+                      <span>Rate:</span>
+                      <span className="font-medium">1 USDC = $1.00</span>
                     </div>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => {
-                    navigator.clipboard.writeText(walletAddress);
-                    toast.success("Address copied!");
-                  }}
-                >
-                  Copy Address
-                </Button>
               </div>
               <div className="text-xs text-muted-foreground">
                 <p className="font-semibold mb-2">Supported Networks:</p>
@@ -230,7 +230,7 @@ export const CreditsPanel = ({ selectedNetwork, addresses }: { selectedNetwork: 
                 </div>
               </div>
               <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 text-xs">
-                Credits are automatically added when USDC is received
+                USD is automatically added when USDC is received
               </div>
 
               {deposits.length > 0 && (

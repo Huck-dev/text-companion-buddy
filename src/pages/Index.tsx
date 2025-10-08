@@ -1,14 +1,11 @@
 import { useState } from "react";
-import { Server, User } from "lucide-react";
+import { Server } from "lucide-react";
 import { UnifiedServersPanel } from "@/components/UnifiedServersPanel";
 import { UserMenu } from "@/components/UserMenu";
 import { CreditsPanel } from "@/components/CreditsPanel";
-import { AccountsListPanel } from "@/components/AccountsListPanel";
-import { AccountManager } from "@/components/AccountManager";
 import { FriendsPanel } from "@/components/FriendsPanel";
-import { Button } from "@/components/ui/button";
 import { LogoCube } from "@/components/LogoCube";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
@@ -45,34 +42,18 @@ const Index = () => {
       {/* Right-side Account Sheet */}
       <Sheet open={isAccountOpen} onOpenChange={setIsAccountOpen}>
         <SheetContent side="right" className="w-[500px] sm:max-w-[500px] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="text-xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Account Management
-            </SheetTitle>
-          </SheetHeader>
-          
           <Tabs defaultValue="account" className="mt-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="account">Account</TabsTrigger>
-              <TabsTrigger value="manage">Manage</TabsTrigger>
               <TabsTrigger value="friends">Friends</TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
             </TabsList>
             
             <TabsContent value="account" className="mt-4">
               <CreditsPanel selectedNetwork={selectedNetwork} addresses={addresses} />
             </TabsContent>
             
-            <TabsContent value="manage" className="mt-4">
-              <AccountManager />
-            </TabsContent>
-            
             <TabsContent value="friends" className="mt-4">
               <FriendsPanel />
-            </TabsContent>
-            
-            <TabsContent value="users" className="mt-4">
-              <AccountsListPanel />
             </TabsContent>
           </Tabs>
         </SheetContent>
